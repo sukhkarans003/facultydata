@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Professional 3D Showcase</title>
+    <!-- Tailwind CSS for styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Three.js for 3D -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <!-- GSAP for Animations -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap');
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            margin: 0;
+            overflow-x: hidden;
+            background-color: #050505;
+            color: #ffffff;
+        }
+
+        /* 3D Canvas fixed at back */
+        #canvas-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            background: radial-gradient(circle at center, #1a1a2e 0%, #000000 100%);
+        }
+
+        /* Glassmorphism Classes */
+        .glass {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .glass-nav {
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(15px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        /* Text Gradients */
+        .text-gradient {
+            background: linear-gradient(to right, #00f260, #0575E6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #000;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #333;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
+
+        /* Utility */
+        .clip-text-image {
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+        }
+    </style>
+</head>
+<body class="antialiased selection:bg-blue-500 selection:text-white">
+
+    <!-- 3D Background Container -->
+    <div id="canvas-container"></div>
+
+    <!-- Navigation -->
+    <nav class="fixed w-full z-50 glass-nav transition-all duration-300" id="navbar">
+        <div class="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
+            <div class="text-2xl font-bold tracking-tighter">
+                <span class="text-white">PRO</span><span class="text-blue-500">FUSION</span>
+            </div>
+            <div class="hidden md:flex space-x-8 text-sm font-semibold tracking-wide text-gray-300">
+                <a href="#home" class="hover:text-white transition-colors">HOME</a>
+                <a href="#about" class="hover:text-white transition-colors">ABOUT</a>
+                <a href="#services" class="hover:text-white transition-colors">SERVICES</a>
+                <a href="#contact" class="hover:text-white transition-colors">CONTACT</a>
+            </div>
+            <button class="bg-white text-black px-6 py-2 rounded-full font-bold hover:bg-blue-500 hover:text-white transition-all transform hover:scale-105 duration-300">
+                Get Started
+            </button>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main>
+        <!-- Hero Section -->
+        <section id="home" class="min-h-screen flex items-center justify-center relative pt-20">
+            <div class="max-w-7xl mx-auto px-6 grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+                <div class="z-10 space-y-6 hero-content">
+                    <div class="inline-block px-4 py-1 rounded-full border border-blue-500/30 bg-blue-500/10 text-blue-400 text-xs font-bold tracking-widest mb-2">
+                        NEXT GEN DESIGN
+                    </div>
+                    <h1 class="text-5xl md:text-7xl font-extrabold leading-tight">
+                        We Build The <br>
+                        <span class="text-gradient">Digital Future</span>
+                    </h1>
+                    <p class="text-gray-400 text-lg md:text-xl max-w-lg leading-relaxed">
+                        Elevate your brand with immersive 3D experiences and cutting-edge web design. 
+                        Tuhadi PDF da content jehra vi ho, ohnu life vich laiye haan.
+                    </p>
+                    <div class="flex flex-col sm:flex-row gap-4 pt-4">
+                        <a href="#about" class="group relative px-8 py-4 bg-white text-black font-bold rounded-lg overflow-hidden">
+                            <span class="relative z-10 group-hover:text-white transition-colors duration-300">Explore Work</span>
+                            <div class="absolute inset-0 bg-blue-600 transform scale-x-0 group-hover:scale-x-100 transition-transform origin-left duration-300 ease-out"></div>
+                        </a>
+                        <button class="px-8 py-4 border border-white/20 rounded-lg font-semibold hover:bg-white/10 transition-colors backdrop-blur-sm">
+                            View Showreel
+                        </button>
+                    </div>
+                </div>
+                <!-- The right side is left open for the 3D object to be visible -->
+                <div class="hidden lg:block h-full"></div>
+            </div>
+            
+            <!-- Scroll Indicator -->
+            <div class="absolute bottom-10 left-1/2 transform -translate-x-1/2 flex flex-col items-center animate-bounce opacity-50">
+                <span class="text-xs tracking-widest mb-2">SCROLL</span>
+                <div class="w-[1px] h-12 bg-gradient-to-b from-white to-transparent"></div>
+            </div>
+        </section>
+
+        <!-- About Section -->
+        <section id="about" class="py-24 relative z-10">
+            <div class="max-w-7xl mx-auto px-6">
+                <div class="glass p-8 md:p-16 rounded-3xl border border-white/5 shadow-2xl relative overflow-hidden">
+                    <div class="absolute top-0 right-0 w-64 h-64 bg-blue-600/20 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none"></div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
+                        <div class="space-y-6 about-text">
+                            <h2 class="text-4xl font-bold">About The <span class="text-blue-400">Vision</span></h2>
+                            <p class="text-gray-300 leading-relaxed">
+                                Sanu vishwas hai ki design sirf dikhna nahi, mehsoos hona chahida. 
+                                Jithe tuhadi PDF di baat kardi hai, oh concept nu 3D dimension vich convert karna vaada.
+                                Asi tradition barriers tod ke naya standard set karde haan.
+                            </p>
+                            <ul class="space-y-4 pt-4">
+                                <li class="flex items-center space-x-3">
+                                    <span class="w-2 h-2 bg-blue-500 rounded-full"></span>
+                                    <span>Interactive 3D Elements</span>
+                                </li>
+                                <li class="flex items-center space-x-3">
+                                    <span class="w-2 h-2 bg-blue-500 rounded-full"></span>
+                                    <span>High Performance Rendering</span>
+                                </li>
+                                <li class="flex items-center space-x-3">
+                                    <span class="w-2 h-2 bg-blue-500 rounded-full"></span>
+                                    <span>Modern UI/UX Principles</span>
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="relative h-64 md:h-96 w-full rounded-2xl overflow-hidden group">
+                            <!-- Placeholder for an image from PDF -->
+                            <img src="https://picsum.photos/seed/tech/800/600" alt="About Visual" class="object-cover w-full h-full transform group-hover:scale-110 transition-transform duration-700">
+                            <div class="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent flex items-end p-6">
+                                <p class="text-lg font-semibold">Innovation at its core.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Services Section -->
+        <section id="services" class="py-24 relative z-10">
+            <div class="max-w-7xl mx-auto px-6">
+                <div class="text-center mb-16 space-y-4 services-header">
+                    <h2 class="text-4xl md:text-5xl font-bold">Our <span class="text-gradient">Expertise</span></h2>
+                    <p class="text-gray-400 max-w-2xl mx-auto">
+                        Tuhade project di requirements mutabik, ehna services vich asi expertise rakhide haan.
+                    </p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                    <!-- Card 1 -->
+                    <div class="glass p-8 rounded-2xl hover:bg-white/5 transition-all duration-300 transform hover:-translate-y-2 group cursor-pointer service-card">
+                        <div class="w-14 h-14 bg-blue-500/20 rounded-xl flex items-center justify-center mb-6 group-hover:bg-blue-500 transition-colors">
+                            <svg class="w-8 h-8 text-blue-400 group-hover:text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.384-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"></path></svg>
+                        </div>
+                        <h3 class="text-xl font-bold mb-3">3D Web Development</h3>
+                        <p class="text-gray-400 text-sm leading-relaxed">
+                            Browser vich high-end 3D graphics render karna, WebGL te Three.js technicalities vaar.
+                        </p>
+                    </div>
+
+                    <!-- Card 2 -->
+                    <div class="glass p-8 rounded-2xl hover:bg-white/5 transition-all duration-300 transform hover:-translate-y-2 group cursor-pointer service-card">
+                        <div class="w-14 h-14 bg-purple-500/20 rounded-xl flex items-center justify-center mb-6 group-hover:bg-purple-500 transition-colors">
+                            <svg class="w-8 h-8 text-purple-400 group-hover:text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01"></path></svg>
+                        </div>
+                        <h3 class="text-xl font-bold mb-3">Creative UI/UX</h3>
+                        <p class="text-gray-400 text-sm leading-relaxed">
+                            User-centric design jo na sirf sundar hai, balki use karna vich vah sadha hai.
+                        </p>
+                    </div>
+
+                    <!-- Card 3 -->
+                    <div class="glass p-8 rounded-2xl hover:bg-white/5 transition-all duration-300 transform hover:-translate-y-2 group cursor-pointer service-card">
+                        <div class="w-14 h-14 bg-pink-500/20 rounded-xl flex items-center justify-center mb-6 group-hover:bg-pink-500 transition-colors">
+                            <svg class="w-8 h-8 text-pink-400 group-hover:text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                        </div>
+                        <h3 class="text-xl font-bold mb-3">Fast Performance</h3>
+                        <p class="text-gray-400 text-sm leading-relaxed">
+                            Optimized code taaki bhaari 3D graphics vich bhi website tez load ho.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Contact Section -->
+        <section id="contact" class="py-24 relative z-10">
+            <div class="max-w-4xl mx-auto px-6">
+                <div class="glass p-10 md:p-14 rounded-3xl text-center space-y-8">
+                    <h2 class="text-4xl font-bold">Ready to <span class="text-gradient">Collaborate?</span></h2>
+                    <p class="text-gray-300">
+                        Agar tuhade kol koi project hai jo tuhadi PDF da hissa hai, taan sanu message karo. Asi sanu discuss karange.
+                    </p>
+                    
+                    <form class="max-w-md mx-auto space-y-4 text-left" onsubmit="event.preventDefault(); showToast();">
+                        <div>
+                            <label class="block text-xs font-bold uppercase tracking-widest text-gray-500 mb-2">Email</label>
+                            <input type="email" placeholder="your@email.com" class="w-full bg-black/30 border border-white/10 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-blue-500 transition-colors">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold uppercase tracking-widest text-gray-500 mb-2">Message</label>
+                            <textarea rows="4" placeholder="Project details..." class="w-full bg-black/30 border border-white/10 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-blue-500 transition-colors"></textarea>
+                        </div>
+                        <button type="submit" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-4 rounded-lg transition-all transform hover:scale-[1.02] shadow-lg shadow-blue-500/30">
+                            Send Message
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <footer class="py-8 border-t border-white/5 relative z-10 text-center text-gray-500 text-sm">
+            <p>&copy; 2023 Profusion Design. All rights reserved.</p>
+        </footer>
+    </main>
+
+    <!-- Custom Toast Notification -->
+    <div id="toast" class="fixed bottom-5 right-5 bg-white text-black px-6 py-4 rounded-lg shadow-2xl transform translate-y-24 transition-transform duration-300 flex items-center gap-3 z-50">
+        <div class="bg-green-500 rounded-full p-1">
+            <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+        </div>
+        <div>
+            <h4 class="font-bold text-sm">Message Sent!</h4>
+            <p class="text-xs text-gray-600">We will contact you soon.</p>
+        </div>
+    </div>
+
+    <script>
+        // --- UI Logic & Animations ---
+        
+        // Register ScrollTrigger
+        gsap.registerPlugin(ScrollTrigger);
+
+        // Hero Animation
+        gsap.from(".hero-content > *", {
+            y: 50,
+            opacity: 0,
+            duration: 1,
+            stagger: 0.2,
+            ease: "power3.out",
+            delay: 0.5
+        });
+
+        // About Section Animation
+        gsap.from(".about-text", {
+            scrollTrigger: {
+                trigger: "#about",
+                start: "top 80%",
+            },
+            x: -50,
+            opacity: 0,
+            duration: 1
+        });
+
+        // Services Cards Stagger
+        gsap.from(".service-card", {
+            scrollTrigger: {
+                trigger: "#services",
+                start: "top 75%",
+            },
+            y: 50,
+            opacity: 0,
+            duration: 0.8,
+            stagger: 0.2,
+            ease: "back.out(1.7)"
+        });
+
+        // Navbar blur on scroll
+        window.addEventListener('scroll', () => {
+            const nav = document.getElementById('navbar');
+            if (window.scrollY > 50) {
+                nav.classList.add('shadow-lg');
+                nav.style.background = 'rgba(0,0,0,0.8)';
+            } else {
+                nav.classList.remove('shadow-lg');
+                nav.style.background = 'rgba(0,0,0,0.5)';
+            }
+        });
+
+        // Toast Function
+        function showToast() {
+            const toast = document.getElementById('toast');
+            toast.classList.remove('translate-y-24');
+            setTimeout(() => {
+                toast.classList.add('translate-y-24');
+            }, 3000);
+        }
+
+        // --- THREE.JS 3D SCENE SETUP ---
+        const initThreeJS = () => {
+            const container = document.getElementById('canvas-container');
+            const scene = new THREE.Scene();
+            
+            // Fog for depth
+            scene.fog = new THREE.FogExp2(0x050505, 0.002);
+
+            const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+            const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+            
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setPixelRatio(window.devicePixelRatio);
+            container.appendChild(renderer.domElement);
+
+            // 1. Main Geometry: Icosahedron with Wireframe
+            const geometry = new THREE.IcosahedronGeometry(2, 1); // Radius 2, Detail 1
+            
+            // Material 1: The solid inner shape (dark, glossy)
+            const materialSolid = new THREE.MeshPhongMaterial({
+                color: 0x111111,
+                emissive: 0x001133,
+                specular: 0xffffff,
+                shininess: 20,
+                flatShading: true,
+                transparent: true,
+                opacity: 0.9
+            });
+            
+            // Material 2: The wireframe overlay (glowing)
+            const materialWire = new THREE.MeshBasicMaterial({
+                color: 0x00f260,
+                wireframe: true,
+                transparent: true,
+                opacity: 0.3
+            });
+
+            const meshSolid = new THREE.Mesh(geometry, materialSolid);
+            const meshWire = new THREE.Mesh(geometry, materialWire);
+            
+            // Group them
+            const mainGroup = new THREE.Group();
+            mainGroup.add(meshSolid);
+            mainGroup.add(meshWire);
+            
+            // Position it to the right side on desktop
+            if(window.innerWidth > 1024) {
+                mainGroup.position.x = 3;
+            } else {
+                mainGroup.position.y = 1; // Move up on mobile
+            }
+            
+            scene.add(mainGroup);
+
+            // 2. Particles (Stars/Dust)
+            const particlesGeometry = new THREE.BufferGeometry();
+            const particlesCount = 700;
+            const posArray = new Float32Array(particlesCount * 3);
+
+            for(let i = 0; i < particlesCount * 3; i++) {
+                // Spread particles widely
+                posArray[i] = (Math.random() - 0.5) * 20; 
+            }
+
+            particlesGeometry.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
+            const particlesMaterial = new THREE.PointsMaterial({
+                size: 0.02,
+                color: 0x0575E6,
+                transparent: true,
+                opacity: 0.8,
+            });
+            const particlesMesh = new THREE.Points(particlesGeometry, particlesMaterial);
+            scene.add(particlesMesh);
+
+            // 3. Lights
+            const ambientLight = new THREE.AmbientLight(0x404040, 2);
+            scene.add(ambientLight);
+
+            const pointLight1 = new THREE.PointLight(0x00f260, 2, 50);
+            pointLight1.position.set(5, 5, 5);
+            scene.add(pointLight1);
+
+            const pointLight2 = new THREE.PointLight(0x0575E6, 2, 50);
+            pointLight2.position.set(-5, -5, 5);
+            scene.add(pointLight2);
+
+            camera.position.z = 5;
+
+            // Interactive Mouse Movement
+            let mouseX = 0;
+            let mouseY = 0;
+            let targetX = 0;
+            let targetY = 0;
+
+            const windowHalfX = window.innerWidth / 2;
+            const windowHalfY = window.innerHeight / 2;
+
+            document.addEventListener('mousemove', (event) => {
+                mouseX = (event.clientX - windowHalfX);
+                mouseY = (event.clientY - windowHalfY);
+            });
+
+            // Animation Loop
+            const clock = new THREE.Clock();
+
+            const animate = () => {
+                requestAnimationFrame(animate);
+                const elapsedTime = clock.getElapsedTime();
+
+                targetX = mouseX * 0.001;
+                targetY = mouseY * 0.001;
+
+                // Smooth rotation based on mouse
+                mainGroup.rotation.y += 0.05 * (targetX - mainGroup.rotation.y);
+                mainGroup.rotation.x += 0.05 * (targetY - mainGroup.rotation.x);
+
+                // Constant idle rotation
+                mainGroup.rotation.z += 0.002;
+                meshWire.rotation.y -= 0.001; // Wireframe rotates slightly opposite
+
+                // Particles movement (subtle wave)
+                particlesMesh.rotation.y = elapsedTime * 0.05;
+                particlesMesh.rotation.x = elapsedTime * 0.02;
+
+                // Responsiveness for 3D object position
+                if(window.innerWidth > 1024) {
+                     mainGroup.position.x = 3 + (mouseX * 0.0005); 
+                } else {
+                     mainGroup.position.set(0, -1, 0); // Center on mobile
+                }
+
+                renderer.render(scene, camera);
+            };
+
+            animate();
+
+            // Resize Handler
+            window.addEventListener('resize', () => {
+                camera.aspect = window.innerWidth / window.innerHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize(window.innerWidth, window.innerHeight);
+                
+                if(window.innerWidth > 1024) {
+                    mainGroup.position.x = 3;
+                    mainGroup.position.y = 0;
+                } else {
+                    mainGroup.position.set(0, -1, 0);
+                }
+            });
+        };
+
+        // Initialize 3D Scene
+        initThreeJS();
+
+    </script>
+</body>
+</html>

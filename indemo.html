@@ -1,0 +1,3375 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>University Management System</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        :root {
+            /* PROFESSIONAL THEME VARIABLES */
+            --primary: #dc2626; /* Deep Red (CU Brand Color) */
+            --primary-dark: #b91c1c;
+            --secondary: #1e293b; /* Dark Navy/Slate */
+            --accent: #ef4444; /* Bright Red */
+            --success: #10b981; /* Emerald Green */
+            --danger: #ef4444; /* Red for warnings */
+            --warning: #f59e0b;
+            --light: #f8fafc;
+            --dark: #0f172a;
+            --text-grey: #64748b;
+            --text-light: #94a3b8;
+            --shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            --radius: 6px;
+            --gold: #D4AF37;
+            --bg-body: #f1f5f9;
+            --card-bg: #ffffff;
+            --border-color: #e2e8f0;
+
+            /* Leave Ledger Specific Colors */
+            --leave-short: #f97316; /* Orange */
+            --leave-medical: #1e3a8a; /* Dark Blue */
+            --leave-half: #fb923c; /* Yellow-Orange mix */
+            --leave-casual: #9333ea; /* Purple */
+
+            /* Compact Sizing */
+            --header-height: 56px;
+            --sidebar-width: 240px;
+        }
+
+        /* Dark Mode Variables - High Contrast */
+        [data-theme="dark"] {
+            --bg-body: #0f172a;
+            --card-bg: #1e293b;
+            --text-main: #f1f5f9;
+            --text-grey: #cbd5e1;
+            --border-color: #334155;
+            --shadow: 0 4px 6px rgba(0, 0, 0, 0.5);
+            --light: #1e293b; /* Input background in dark mode */
+        }
+
+        /* GLOBAL RESET & BASE STYLES */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background-color: var(--bg-body);
+            color: #1e293b;
+            height: 100vh;
+            width: 100vw;
+            overflow: hidden; /* Prevent body scroll */
+            display: flex;
+            flex-direction: column;
+            transition: background 0.3s, color 0.3s;
+        }
+
+        [data-theme="dark"] body {
+            color: #f1f5f9;
+        }
+
+        /* --- HEADER --- */
+        .new-header {
+            background-color: var(--card-bg);
+            height: var(--header-height);
+            padding: 0 1.25rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid var(--border-color);
+            box-shadow: var(--shadow);
+            z-index: 1000;
+            flex-shrink: 0;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            min-width: 180px;
+        }
+
+        .date-display {
+            font-weight: 600;
+            color: var(--primary);
+            font-size: 0.85rem;
+            letter-spacing: 0.5px;
+        }
+
+        .weather-display {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.75rem;
+            color: var(--text-grey);
+        }
+
+        .weather-icon {
+            color: var(--warning);
+        }
+
+        .header-center {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            padding: 0 1rem;
+        }
+
+        .search-bar {
+            position: relative;
+            width: 100%;
+            max-width: 450px;
+        }
+
+        .search-bar input {
+            width: 100%;
+            padding: 8px 12px 8px 36px;
+            border-radius: 20px;
+            border: 1px solid var(--border-color);
+            background: var(--bg-body);
+            color: inherit;
+            outline: none;
+            transition: all 0.2s;
+            font-size: 0.85rem;
+        }
+
+        .search-bar input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 2px rgba(220, 38, 38, 0.1);
+            background: var(--card-bg);
+        }
+
+        .search-bar i {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-grey);
+            font-size: 0.8rem;
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            min-width: 140px;
+            justify-content: flex-end;
+        }
+
+        .theme-toggle {
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 50%;
+            transition: 0.2s;
+            color: inherit;
+            background: transparent;
+            border: 1px solid var(--border-color);
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .theme-toggle:hover {
+            background: var(--bg-body);
+        }
+
+        .icon-btn-header {
+            position: relative;
+            cursor: pointer;
+            color: inherit;
+            font-size: 1.1rem;
+            padding: 8px;
+            border-radius: 50%;
+            transition: 0.2s;
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .icon-btn-header:hover {
+            background-color: rgba(0, 0, 0, 0.05);
+        }
+
+        /* --- LAYOUT CONTAINER --- */
+        .d-container {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* --- SIDEBAR --- */
+        .sidebar {
+            width: var(--sidebar-width);
+            background: var(--card-bg);
+            border-right: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+            flex-shrink: 0;
+            transition: transform 0.3s ease;
+            z-index: 900;
+        }
+
+        .user-profile {
+            padding: 1.25rem;
+            text-align: center;
+            border-bottom: 1px solid var(--border-color);
+            background: rgba(220, 38, 38, 0.03);
+        }
+
+        .user-avatar {
+            width: 64px;
+            height: 64px;
+            border-radius: 50%;
+            background: var(--light);
+            margin: 0 auto 0.75rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            color: var(--secondary);
+            overflow: hidden;
+            border: 2px solid var(--border-color);
+            background-size: cover;
+            background-position: center;
+            box-shadow: var(--shadow);
+        }
+
+        .menu-item {
+            padding: 12px 20px;
+            cursor: pointer;
+            color: var(--text-grey);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            transition: all 0.2s;
+            border-left: 3px solid transparent;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .menu-item:hover,
+        .menu-item.active {
+            background: rgba(220, 38, 38, 0.05);
+            color: var(--primary);
+            border-left-color: var(--primary);
+        }
+
+        .menu-item i {
+            width: 20px;
+            text-align: center;
+        }
+
+        /* --- MAIN CONTENT AREA --- */
+        .main-content {
+            flex: 1;
+            padding: 1rem;
+            overflow: hidden;
+            background: var(--bg-body);
+            position: relative;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* --- DASHBOARD LAYOUTS (Compact) --- */
+        .dashboard-top-row {
+            display: grid;
+            grid-template-columns: 1.2fr 1fr 1fr;
+            gap: 1rem;
+            height: 100%;
+            min-height: 0;
+            margin-bottom: 1rem;
+        }
+
+        .widget-card {
+            background: var(--card-bg);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            padding: 1rem;
+            display: flex;
+            flex-direction: column;
+            border: 1px solid var(--border-color);
+            overflow: hidden;
+            height: 100%;
+        }
+
+        .widget-title {
+            font-size: 0.8rem;
+            color: var(--text-grey);
+            margin-bottom: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-shrink: 0;
+        }
+
+        /* Bar Chart Styles */
+        .bar-chart-container {
+            display: flex;
+            align-items: flex-end;
+            justify-content: space-between;
+            height: 100%;
+            padding-top: 10px;
+            gap: 4px;
+        }
+
+        .bar-col {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            flex: 1;
+            height: 100%;
+            justify-content: flex-end;
+        }
+
+        .bar {
+            width: 100%;
+            max-width: 20px;
+            background: var(--primary);
+            border-radius: 3px 3px 0 0;
+            transition: height 0.5s;
+            position: relative;
+            min-height: 4px;
+        }
+
+        .bar:hover {
+            opacity: 0.8;
+            cursor: pointer;
+        }
+
+        .bar::after {
+            content: attr(data-val);
+            position: absolute;
+            top: -20px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 0.65rem;
+            color: var(--primary);
+            font-weight: bold;
+            opacity: 0;
+            transition: 0.2s;
+            white-space: nowrap;
+        }
+
+        .bar:hover::after {
+            opacity: 1;
+            top: -22px;
+        }
+
+        .bar-label {
+            font-size: 0.65rem;
+            color: var(--text-grey);
+            margin-top: 4px;
+            font-weight: 600;
+            text-align: center;
+        }
+
+        /* Scrollable lists */
+        .updates-feed {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            overflow-y: auto;
+            flex: 1;
+            padding-right: 4px;
+        }
+
+        .updates-feed::-webkit-scrollbar {
+            width: 4px;
+        }
+        .updates-feed::-webkit-scrollbar-thumb {
+            background-color: #cbd5e1;
+            border-radius: 4px;
+        }
+
+        .update-feed-item {
+            padding: 6px 8px;
+            border-bottom: 1px solid var(--border-color);
+            font-size: 0.8rem;
+        }
+        .update-feed-title { font-weight: 600; color: var(--primary); margin-bottom: 2px; font-size: 0.85rem;}
+        .update-feed-meta { font-size: 0.7rem; color: var(--text-grey); display: flex; justify-content: space-between;}
+
+        /* --- ATTENDANCE SECTION --- */
+        .attendance-3-col-layout {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 1rem;
+            height: 100%;
+            min-height: 0;
+        }
+
+        .att-action-card {
+            background: var(--card-bg);
+            padding: 1rem;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            text-align: center;
+            border-top: 4px solid var(--primary);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            height: 100%;
+            overflow: hidden;
+        }
+
+        .att-header-prof h2 {
+            color: var(--primary);
+            margin-bottom: 5px;
+            font-size: 1.1rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .wifi-btn {
+            background: linear-gradient(135deg, #dc2626, #b91c1c);
+            color: white;
+            border: none;
+            padding: 10px;
+            border-radius: 50px;
+            cursor: pointer;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            box-shadow: 0 4px 6px rgba(220, 38, 38, 0.2);
+            transition: all 0.2s;
+            width: 90%;
+            margin: 10px auto;
+            font-size: 0.85rem;
+        }
+
+        .leave-options-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 6px;
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px dashed var(--border-color);
+        }
+
+        .leave-btn {
+            padding: 6px;
+            border: 1px solid var(--border-color);
+            background: var(--bg-body);
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.7rem;
+            font-weight: 600;
+            color: var(--secondary);
+            transition: 0.2s;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .leave-btn:hover { border-color: var(--primary); color: var(--primary); }
+
+        /* Calendar Grid */
+        .attendance-calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 4px;
+            flex: 1;
+            min-height: 0;
+        }
+
+        .cal-cell {
+            aspect-ratio: 1;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: #555;
+            background: var(--card-bg);
+            transition: all 0.2s;
+            position: relative;
+        }
+
+        .cal-cell:hover { transform: scale(1.05); z-index: 2; }
+
+        .status-present { background-color: #dcfce7 !important; color: #166534 !important; border-color: #dcfce7; }
+        .status-absent { background-color: #fee2e2 !important; color: #991b1b !important; border-color: #fee2e2; }
+        .status-none { background-color: transparent; color: #ccc; }
+        .status-short { background-color: var(--leave-short) !important; color: white !important; border-color: var(--leave-short); }
+        .status-medical { background-color: var(--leave-medical) !important; color: white !important; border-color: var(--leave-medical); }
+        .status-halfday { background-color: var(--leave-half) !important; color: white !important; border-color: var(--leave-half); }
+        .status-casual { background-color: var(--leave-casual) !important; color: white !important; border-color: var(--leave-casual); }
+
+        .cal-cell.today { border: 2px solid var(--primary); z-index: 1; }
+        .cal-cell.empty { background: transparent; border: none; cursor: default; }
+
+        /* Leave Ledger (2x2) */
+        .leave-ledger-section { display: flex; flex-direction: column; height: 100%; overflow: hidden; }
+        .ledger-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            grid-template-rows: 1fr 1fr;
+            gap: 8px;
+            flex: 1;
+            padding: 8px 0;
+            min-height: 0;
+        }
+
+        .ledger-card {
+            background: var(--bg-body);
+            padding: 8px;
+            border-radius: 6px;
+            border: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+        }
+
+        .pie-chart {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            margin-bottom: 4px;
+        }
+
+        .pie-chart::after {
+            content: ''; position: absolute; width: 28px; height: 28px;
+            background: var(--card-bg); border-radius: 50%;
+        }
+
+        .pie-text {
+            position: absolute; z-index: 2; font-size: 0.7rem; font-weight: bold;
+            color: var(--primary); display: flex; flex-direction: column; align-items: center;
+        }
+
+        /* Disclaimer Box - Darker as requested */
+        .disclaimer-box {
+            margin-top: 15px; /* Added space */
+            padding: 10px;
+            background-color: #334155; /* Dark background */
+            color: #f8fafc; /* Light text */
+            border-radius: 4px;
+            font-size: 0.75rem;
+            border-left: 3px solid var(--warning);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            text-align: left;
+        }
+
+        /* --- AUTH VIEW --- */
+        #auth-view {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            display: flex; justify-content: center; align-items: center;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            z-index: 2000;
+        }
+
+        .auth-box {
+            background: white; padding: 2rem; border-radius: var(--radius);
+            box-shadow: var(--shadow-lg); width: 100%; max-width: 380px; text-align: center;
+        }
+
+        /* --- FORM ELEMENTS --- */
+        .form-group { margin-bottom: 0.75rem; text-align: left; }
+        .form-group label { display: block; margin-bottom: 4px; color: var(--text-grey); font-size: 0.8rem; font-weight: 500; }
+        .form-group input, .form-group select, .form-group textarea {
+            width: 100%; padding: 8px 12px; border: 1px solid var(--border-color);
+            border-radius: var(--radius); transition: 0.2s; background: #fff; color: #333; font-size: 0.9rem;
+        }
+        .form-group input:focus { border-color: var(--primary); outline: none; box-shadow: 0 0 0 2px rgba(220,38,38,0.1); }
+
+        .btn {
+            padding: 10px 20px; border: none; border-radius: var(--radius); cursor: pointer;
+            width: 100%; margin-top: 8px; font-weight: 600; transition: 0.2s; font-size: 0.9rem;
+        }
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-primary:hover { background: var(--primary-dark); }
+        .btn-danger { background: var(--danger); color: white; }
+        .btn-success { background: var(--success); color: white; }
+        .btn-warning { background: var(--warning); color: white; }
+        .btn-sm { width: auto; padding: 6px 12px; font-size: 0.8rem; margin: 0; display: inline-flex; align-items: center; justify-content: center; }
+
+        /* --- CARDS & TABLES --- */
+        .card {
+            background: var(--card-bg); padding: 1rem; border-radius: var(--radius);
+            box-shadow: var(--shadow); margin-bottom: 1rem; overflow: hidden;
+            border: 1px solid var(--border-color); display: flex; flex-direction: column;
+        }
+
+        .card-header {
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 0.75rem; border-bottom: 1px solid var(--border-color);
+            padding-bottom: 0.5rem; flex-shrink: 0;
+        }
+
+        /* Excel Style Table for Adjustments */
+        .excel-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.8rem;
+            background: white;
+        }
+        .excel-table th, .excel-table td {
+            border: 1px solid #94a3b8; /* Distinct borders like Excel */
+            padding: 6px 8px;
+            text-align: left;
+        }
+        .excel-table th {
+            background-color: #f1f5f9;
+            color: var(--secondary);
+            font-weight: 600;
+            position: sticky;
+            top: 0;
+        }
+        .excel-table tr:nth-child(even) { background-color: #f8fafc; }
+        .excel-table tr:hover { background-color: #e2e8f0; }
+
+        /* Timetable Specific */
+        .tt-table-container { width: 100%; overflow: auto; flex: 1; min-height: 0; }
+        .tt-day-col { background: #fff1f2; font-weight: 700; text-align: left; padding: 8px !important; width: 70px; font-size: 0.8rem; min-width: 70px; }
+        .tt-time-header { background: var(--secondary); color: white; font-size: 0.75rem; padding: 4px 2px; white-space: nowrap; }
+        .tt-cell { min-width: 70px; height: 50px; vertical-align: middle; cursor: pointer; border: 1px solid var(--border-color); padding: 2px; font-size: 0.7rem; }
+        .tt-cell:hover { background-color: #ffe4e6; }
+        .tt-plus-btn { display: flex; align-items: center; justify-content: center; width: 100%; height: 100%; color: #ccc; background: transparent; border: none; cursor: pointer; }
+        .tt-plus-btn:hover { color: var(--primary); }
+        .tt-subj { font-weight: 700; display: block; color: var(--primary); font-size: 0.75rem; line-height: 1.1; }
+        .tt-code { font-size: 0.65rem; color: #7f8c8d; display: block; }
+        .tt-block { font-size: 0.65rem; color: #e67e22; font-weight: 600; display: inline-block; background: #fdf2e9; padding: 1px 2px; border-radius: 2px; margin-top: 2px; }
+        .tt-room { font-size: 0.65rem; color: var(--success); font-weight: 700; margin-top: 2px; display: block; }
+        .tt-break { background-color: #fef3c7; color: #92400e; font-weight: 700; font-size: 0.75rem; text-align: center; vertical-align: middle; }
+
+        .action-btn { padding: 4px; border: none; border-radius: 4px; cursor: pointer; color: white; font-size: 0.75rem; margin-right: 2px; display: inline-flex; align-items: center; justify-content: center; }
+        .btn-approve { background-color: var(--success); }
+        .btn-reject { background-color: var(--danger); }
+
+        /* --- FREE TEACHERS --- */
+        .free-teachers-grid {
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+            gap: 8px; margin-top: 10px; max-height: 180px; overflow-y: auto;
+            padding: 8px; background: var(--bg-body); border-radius: var(--radius); border: 1px dashed var(--border-color);
+        }
+        .free-teacher-card {
+            background: white; border: 1px solid var(--border-color); border-radius: 6px;
+            padding: 8px; display: flex; align-items: center; gap: 8px; cursor: pointer; transition: 0.2s;
+        }
+        .free-teacher-card:hover { border-color: var(--primary); background: #fff1f2; }
+        .free-teacher-card.selected { border-color: var(--success); background: #dcfce7; }
+        .ft-photo { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; border: 1px solid #eee; }
+        .ft-info { flex: 1; min-width: 0; }
+        .ft-name { font-size: 0.8rem; font-weight: 700; color: var(--dark); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .ft-details { font-size: 0.7rem; color: var(--text-grey); display: flex; justify-content: space-between; margin-top: 2px; }
+        .ft-load { color: var(--warning); font-weight: 600; }
+
+        /* --- CLASS UPDATE SPLIT LAYOUT --- */
+        .class-update-layout { display: flex; gap: 1rem; height: 100%; min-height: 0; }
+        .manage-classes-col { flex: 0 0 250px; display: flex; flex-direction: column; gap: 10px; background: var(--card-bg); padding: 1rem; border-radius: var(--radius); border: 1px solid var(--border-color); border-top: 4px solid var(--gold); height: 100%; overflow-y: auto; }
+        
+        /* NEW: Right side column for Student Group Management */
+        .manage-students-col { 
+            flex: 0 0 250px; 
+            display: flex; 
+            flex-direction: column; 
+            gap: 10px; 
+            background: var(--card-bg); 
+            padding: 1rem; 
+            border-radius: var(--radius); 
+            border: 1px solid var(--border-color); 
+            border-top: 4px solid var(--primary); 
+            height: 100%; 
+            overflow-y: auto; 
+        }
+
+        .post-update-col { flex: 1; display: flex; flex-direction: column; gap: 1rem; height: 100%; min-height: 0; }
+
+        .msg-pane { display: flex; flex-direction: column; min-height: 0; }
+        .msg-compose-card {
+            background: var(--card-bg); border: 1px solid var(--border-color); border-radius: var(--radius);
+            padding: 1rem; display: flex; flex-direction: column; box-shadow: var(--shadow); flex: 0 0 auto;
+        }
+        .msg-form-group { margin-bottom: 8px; }
+        .msg-form-group label { display: block; margin-bottom: 4px; font-weight: 600; color: var(--primary); font-size: 0.75rem; }
+        .msg-input, .msg-textarea { width: 100%; padding: 8px; border: 1px solid var(--border-color); border-radius: 4px; font-size: 0.85rem; transition: 0.2s; background: var(--card-bg); color: inherit; }
+        .msg-textarea { resize: none; flex: 1; min-height: 60px; }
+
+        .update-card {
+            border-left: 3px solid var(--accent); background: #fff1f2; padding: 10px;
+            margin-bottom: 8px; border-radius: 4px; position: relative; font-size: 0.85rem;
+        }
+        .update-actions { position: absolute; top: 5px; right: 5px; display: flex; gap: 5px; }
+        .update-action-btn { background: none; border: none; cursor: pointer; font-size: 0.8rem; padding: 2px; border-radius: 4px; transition: 0.2s; }
+        .update-action-btn.edit { color: var(--primary); }
+        .update-action-btn.delete { color: var(--danger); }
+
+        /* --- PROFILE --- */
+        .profile-pro-container { max-width: 100%; padding: 0; height: 100%; overflow-y: auto; }
+        .profile-card { background: var(--card-bg); border-radius: var(--radius); box-shadow: var(--shadow); overflow: hidden; border: 1px solid var(--border-color); margin-bottom: 1rem; }
+        .profile-header-bg { height: 80px; background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%); position: relative; display: flex; align-items: center; justify-content: center; color: rgba(255,255,255,0.2); font-size: 2rem; }
+        .profile-pic-wrapper { position: absolute; top: 40px; left: 30px; width: 80px; height: 80px; background: white; border: 3px solid white; border-radius: 50%; overflow: hidden; box-shadow: var(--shadow); z-index: 10; cursor: pointer; }
+        .profile-pic-large { width: 100%; height: 100%; object-fit: cover; }
+        .verified-badge { position: absolute; bottom: 2px; right: 2px; width: 18px; height: 18px; background: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: var(--success); font-size: 10px; }
+        .profile-body { padding: 50px 30px 20px 30px; position: relative; }
+        .profile-name { font-size: 1.25rem; font-weight: 700; margin-bottom: 5px; display: flex; align-items: center; gap: 10px; }
+        .profile-role-badge { background: var(--primary); color: white; padding: 4px 8px; border-radius: 12px; font-size: 0.6rem; font-weight: 700; text-transform: uppercase; }
+        .profile-meta { color: var(--text-grey); font-size: 0.8rem; display: flex; gap: 15px; flex-wrap: wrap; margin-bottom: 15px; }
+        .profile-meta i { color: var(--primary); margin-right: 5px; }
+        .profile-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 20px; }
+        .stat-box { background: var(--bg-body); border: 1px solid var(--border-color); border-radius: 8px; padding: 15px; text-align: center; transition: 0.2s; }
+        .stat-box h4 { font-size: 1.5rem; color: var(--dark); margin: 0; font-weight: 800; }
+        .stat-box p { color: var(--text-grey); font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 700; margin-top: 5px; margin-bottom: 0; }
+        .profile-info-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; }
+        .info-box { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 8px; padding: 12px; display: flex; align-items: center; gap: 12px; transition: 0.2s; }
+        .info-icon { width: 36px; height: 36px; background: #fff1f2; color: var(--accent); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 1rem; flex-shrink: 0; }
+        .info-details h5 { font-size: 0.7rem; color: var(--text-grey); text-transform: uppercase; margin: 0; font-weight: 700; }
+        .info-details span { font-size: 0.85rem; color: var(--dark); font-weight: 600; }
+        .overlay { position: absolute; width: 100%; height: 100%; background: rgba(0,0,0,0.5); border-radius: 50%; display: flex; justify-content: center; align-items: center; color: white; opacity: 0; transition: 0.3s; cursor: pointer; }
+        .profile-pic-wrapper:hover .overlay { opacity: 1; }
+
+        /* --- STUDENT CHAT --- */
+        .proper-chat-container { display: flex; flex-direction: column; height: 100%; background: #eef2f6; box-shadow: var(--shadow); border-radius: 8px; overflow: hidden; border: 1px solid var(--border-color); }
+        .chat-header { background: var(--primary); color: white; padding: 10px 15px; display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; }
+        .chat-header-icons { display: flex; gap: 10px; }
+        .chat-icon-btn { background: rgba(255,255,255,0.2); border: none; color: white; width: 32px; height: 32px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: 0.2s; }
+        .chat-icon-btn:hover { background: rgba(255,255,255,0.4); }
+        .chat-area { flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 10px; }
+        .chat-bubble { max-width: 70%; padding: 8px 12px; border-radius: 12px; position: relative; font-size: 0.85rem; line-height: 1.4; box-shadow: 0 1px 2px rgba(0,0,0,0.1); }
+        .chat-bubble.left { background: white; color: #333; align-self: flex-start; border-bottom-left-radius: 2px; }
+        .chat-bubble.right { background: var(--primary); color: white; align-self: flex-end; border-bottom-right-radius: 2px; }
+        .chat-time { font-size: 0.65rem; opacity: 0.7; float: right; margin-left: 8px; margin-top: 4px; }
+        .chat-input-area { background: white; padding: 10px; display: flex; gap: 10px; align-items: center; border-top: 1px solid var(--border-color); flex-shrink: 0; }
+        .chat-input { flex: 1; padding: 8px 12px; border-radius: 20px; border: 1px solid var(--border-color); outline: none; font-size: 0.85rem; background: var(--bg-body); color: inherit;}
+        .chat-send-btn { background: var(--primary); color: white; width: 36px; height: 36px; border-radius: 50%; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+
+        /* --- MESSAGES --- */
+        .modern-msg-container { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; height: 100%; min-height: 0; }
+        .modern-compose-pane { background: var(--card-bg); border-radius: var(--radius); box-shadow: var(--shadow); padding: 1rem; display: flex; flex-direction: column; border-top: 4px solid var(--primary); overflow-y: auto; border: 1px solid var(--border-color); height: 100%; }
+        .modern-list-pane { background: var(--card-bg); border-radius: var(--radius); box-shadow: var(--shadow); display: flex; flex-direction: column; overflow: hidden; border: 1px solid var(--border-color); height: 100%; }
+        .modern-msg-header { padding: 10px 15px; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; background: var(--bg-body); flex-shrink: 0; }
+        .modern-msg-list { flex: 1; overflow-y: auto; padding: 0; }
+        .modern-msg-item { display: flex; padding: 12px 15px; border-bottom: 1px solid var(--border-color); cursor: pointer; transition: 0.2s; gap: 10px; align-items: flex-start; }
+        .modern-msg-item:hover { background: var(--bg-body); }
+        .modern-avatar { width: 36px; height: 36px; border-radius: 50%; object-fit: cover; border: 1px solid var(--border-color); flex-shrink: 0; }
+        .modern-content { flex: 1; min-width: 0; }
+        .modern-top-row { display: flex; justify-content: space-between; margin-bottom: 2px; }
+        .modern-sender { font-weight: 700; font-size: 0.85rem; }
+        .modern-time { font-size: 0.7rem; color: #999; }
+        .modern-subject { font-weight: 600; color: var(--primary); font-size: 0.85rem; margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .modern-snippet { font-size: 0.8rem; color: var(--text-grey); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .modern-input-group { margin-bottom: 12px; }
+        .modern-input-label { display: block; font-weight: 600; color: var(--secondary); margin-bottom: 4px; font-size: 0.8rem; }
+        .modern-input-field { width: 100%; padding: 8px; border: 1px solid var(--border-color); border-radius: 4px; font-size: 0.85rem; transition: 0.2s; background: var(--bg-body); color: inherit; }
+        .modern-input-field:focus { border-color: var(--accent); outline: none; background: var(--card-bg); }
+        .msg-toggle-btn { background: none; border: none; padding: 6px 10px; font-weight: 600; color: var(--text-grey); cursor: pointer; border-bottom: 2px solid transparent; font-size: 0.85rem; }
+        .msg-toggle-btn.active { color: var(--primary); border-bottom-color: var(--primary); }
+
+        /* --- DROPDOWNS & MODALS --- */
+        .dropdown-wrapper { position: relative; display: inline-block; }
+        .dropdown-menu { display: none; position: absolute; right: 0; top: 100%; background-color: var(--card-bg); min-width: 220px; box-shadow: var(--shadow-lg); z-index: 2000; border-radius: var(--radius); overflow: hidden; margin-top: 5px; border: 1px solid var(--border-color); }
+        .dropdown-item { padding: 10px 15px; text-decoration: none; display: block; color: inherit; border-bottom: 1px solid var(--border-color); cursor: pointer; font-size: 0.85rem; transition: 0.2s; background: var(--card-bg); }
+        .dropdown-item:hover { background-color: rgba(220, 38, 38, 0.05); color: var(--primary); }
+        .dropdown-header { padding: 8px 15px; background: var(--bg-body); font-weight: 600; color: var(--primary); border-bottom: 1px solid var(--border-color); font-size: 0.8rem; }
+
+        .modal { display: none; position: fixed; z-index: 3000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); align-items: center; justify-content: center; backdrop-filter: blur(2px); }
+        .modal-content { background-color: var(--card-bg); padding: 1.5rem; border-radius: var(--radius); width: 90%; max-width: 400px; text-align: center; box-shadow: var(--shadow-lg); color: inherit; max-height: 90vh; overflow-y: auto; }
+        .modal-actions { display: flex; gap: 10px; margin-top: 15px; justify-content: center; }
+
+        .camera-view { width: 100%; height: 250px; background-color: #000; margin-bottom: 10px; border-radius: 8px; display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden; color: white; flex-direction: column; }
+        .camera-overlay { position: absolute; width: 180px; height: 180px; border: 2px dashed rgba(255,255,255,0.7); border-radius: 50%; pointer-events: none; }
+        #live-video { width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1); }
+        #captured-image { display: none; width: 100%; height: 100%; object-fit: cover; }
+
+        #toast { visibility: hidden; min-width: 250px; background-color: var(--secondary); color: #fff; text-align: center; border-radius: 4px; padding: 12px; position: fixed; z-index: 4000; left: 50%; bottom: 30px; transform: translateX(-50%); box-shadow: var(--shadow-lg); font-weight: 500; font-size: 0.9rem; }
+        #toast.show { visibility: visible; animation: fadein 0.5s, fadeout 0.5s 2.5s; }
+
+        @keyframes fadein { from { bottom: 0; opacity: 0; } to { bottom: 30px; opacity: 1; } }
+        @keyframes fadeout { from { bottom: 30px; opacity: 1; } to { bottom: 0; opacity: 0; } }
+
+        /* --- UTILS --- */
+        .class-item-list { margin-top: 10px; max-height: 150px; overflow-y: auto; border: 1px solid var(--border-color); border-radius: 4px; }
+        .class-item-row { display: flex; justify-content: space-between; padding: 6px 8px; border-bottom: 1px solid var(--border-color); font-size: 0.8rem; }
+        .btn-delete-small { color: var(--danger); cursor: pointer; font-size: 0.75rem; }
+
+        .menu-toggle { display: none; font-size: 1.2rem; color: inherit; background: none; border: none; cursor: pointer; margin-right: 10px; }
+
+        /* --- RESPONSIVE --- */
+        @media (max-width: 900px) {
+            .menu-toggle { display: block; }
+            .sidebar { position: fixed; left: -250px; height: calc(100vh - var(--header-height)); top: var(--header-height); }
+            .sidebar.active { left: 0; transform: none; }
+            .header-center { display: none; }
+
+            .dashboard-top-row, .dashboard-bottom-row, .attendance-3-col-layout, .modern-msg-container, .class-update-layout {
+                grid-template-columns: 1fr; height: auto; overflow: visible; display: flex; flex-direction: column;
+            }
+            .dashboard-top-row { margin-bottom: 1rem; }
+
+            .bar-chart-container { height: 200px; }
+            .main-content { overflow-y: auto; }
+            .manage-classes-col, .manage-students-col { width: 100%; flex: none; height: auto; }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Toast -->
+    <div id="toast">Notification</div>
+
+    <!-- HEADER -->
+    <header class="new-header" id="main-header">
+        <button class="menu-toggle" onclick="toggleSidebar()"><i class="fas fa-bars"></i></button>
+        <div class="header-left">
+            <div class="date-display" id="header-date">Loading...</div>
+            <div class="weather-display">
+                <i class="fas fa-cloud-sun weather-icon"></i>
+                <span id="weather-text">--°C</span>
+            </div>
+        </div>
+
+        <div class="header-center">
+            <div class="search-bar">
+                <i class="fas fa-search"></i>
+                <input type="text" placeholder="Search (Timetable, ID, Name...)" id="global-search" onkeydown="handleGlobalSearch(event)">
+            </div>
+        </div>
+
+        <div class="header-right">
+            <button class="theme-toggle" onclick="toggleTheme()" title="Toggle Theme">
+                <i class="fas fa-moon"></i>
+            </button>
+            <div class="dropdown-wrapper">
+                <div class="icon-btn-header" onclick="toggleDropdown('notif-dropdown')">
+                    <i class="fas fa-bell"></i>
+                    <span id="notif-count" class="notif-badge" style="position:absolute; top:0; right:0; background:var(--warning); color:white; font-size:0.6rem; padding:2px 5px; border-radius:50%; display:none;">0</span>
+                </div>
+                <div id="notif-dropdown" class="dropdown-menu">
+                    <div class="dropdown-header">Notifications</div>
+                    <div id="notif-list-dropdown"></div>
+                </div>
+            </div>
+            <div class="dropdown-wrapper">
+                <div class="icon-btn-header" onclick="toggleDropdown('user-dropdown')">
+                    <i class="fas fa-user-circle"></i>
+                </div>
+                <div id="user-dropdown" class="dropdown-menu">
+                    <div class="dropdown-header">My Account</div>
+                    <a class="dropdown-item" onclick="loadSection('profile'); closeAllDropdowns();"><i class="fas fa-id-card"></i> My Profile</a>
+                    <a class="dropdown-item" onclick="openForgotModal(); closeAllDropdowns();"><i class="fas fa-key"></i> Reset Password</a>
+                    <a class="dropdown-item" onclick="logout()" style="color:var(--danger); border:none;"><i class="fas fa-sign-out-alt"></i> Logout</a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Auth View -->
+    <div id="auth-view">
+        <div class="auth-box">
+            <h2 style="margin-bottom:1rem; color:var(--primary);">Portal Login</h2>
+            <form id="login-form">
+                <div class="form-group">
+                    <label>Select Role</label>
+                    <select id="login-role" onchange="updateLoginPlaceholder()">
+                        <option value="employee">Faculty</option>
+                        <option value="hod">HOD</option>
+                        <option value="oa">Office Admin</option>
+                        <option value="student">Student</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>User ID / Username</label>
+                    <input type="text" id="login-user" required placeholder="Enter ID">
+                </div>
+                <div class="form-group">
+                    <label>Password</label>
+                    <input type="password" id="login-pass" required placeholder="Enter password">
+                </div>
+                <button type="submit" class="btn btn-primary">Login</button>
+                <span class="forgot-pass" style="color:var(--primary); cursor:pointer; font-size:0.8rem; text-align:right; display:block; margin-top:5px;" onclick="openForgotModal()">Forgot Password?</span>
+            </form>
+        </div>
+    </div>
+
+    <!-- Dashboard View -->
+    <div id="dashboard-view" style="display:none; width: 100%; height: 100%; flex-direction: column;">
+        <div class="d-container">
+            <aside class="sidebar" id="sidebar">
+                <div class="user-profile">
+                    <div class="user-avatar" id="sidebar-avatar"><i class="fas fa-user"></i></div>
+                    <h3 id="user-name-display" style="font-size: 1rem;">User</h3>
+                    <p id="user-role-display" class="text-sm" style="color: var(--primary); font-size: 0.8rem; margin-top:4px;">Role</p>
+                </div>
+                <div id="menu-container"></div>
+            </aside>
+
+            <main class="main-content">
+                <div id="content-area"></div>
+            </main>
+        </div>
+    </div>
+
+    <!-- Modals -->
+    <!-- 1. WiFi Login Modal -->
+    <div id="wifi-modal" class="modal">
+        <div class="modal-content">
+            <h3><i class="fas fa-wifi"></i> Network Authentication</h3>
+            <p style="margin-bottom:15px; color:var(--text-grey); font-size:0.9rem;">Please verify your campus credentials to mark attendance.</p>
+            <div class="form-group">
+                <label>Faculty ID</label>
+                <input type="text" id="wifi-id" placeholder="Enter ID">
+            </div>
+            <div class="form-group">
+                <label>Password</label>
+                <input type="password" id="wifi-pass" placeholder="Enter password">
+            </div>
+            <div class="modal-actions">
+                <button class="btn btn-danger" onclick="closeModal('wifi-modal')">Cancel</button>
+                <button class="btn btn-success" onclick="verifyWifiCredentials()">Connect</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 2. Camera/Selfie Modal -->
+    <div id="camera-modal" class="modal">
+        <div class="modal-content">
+            <h3>Mark Live Attendance</h3>
+            <p style="margin-bottom:10px; color:var(--text-grey); font-size:0.85rem;">Position your face in the circle and click Capture.</p>
+            <div class="camera-view" id="camera-feed">
+                <div class="camera-overlay"></div>
+                <video id="live-video" autoplay playsinline muted></video>
+                <img id="captured-image" src="" alt="Captured">
+            </div>
+            <div class="modal-actions" id="camera-actions-start">
+                <button class="btn btn-danger" onclick="closeCameraModal()">Cancel</button>
+                <button class="btn btn-primary" id="btn-capture" onclick="captureSelfie()" disabled><i class="fas fa-camera"></i> Capture</button>
+            </div>
+            <div class="modal-actions" id="camera-actions-captured" style="display:none;">
+                <button class="btn btn-warning" onclick="retakeSelfie()"><i class="fas fa-redo"></i> Retake</button>
+                <button class="btn btn-success" onclick="confirmAttendance()"><i class="fas fa-check"></i> Mark Present</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 3. Leave Request Modal -->
+    <div id="leave-modal" class="modal">
+        <div class="modal-content">
+            <h3>Request Leave</h3>
+            <div class="form-group" id="medical-date-group" style="display:none;">
+                <label>Start Date</label>
+                <input type="date" id="leave-start-date">
+                <label style="margin-top:10px;">End Date</label>
+                <input type="date" id="leave-end-date">
+            </div>
+            <div class="form-group" id="single-date-group">
+                <label>Select Date</label>
+                <input type="date" id="leave-date" required>
+            </div>
+            <div class="form-group" id="time-slot-group" style="display:none;">
+                <label>Select Time Slot</label>
+                <select id="leave-time"></select>
+            </div>
+            <div class="form-group">
+                <label>Reason</label>
+                <input type="text" id="leave-reason" placeholder="Enter reason (optional)">
+            </div>
+            <div class="modal-actions">
+                <button class="btn btn-danger" onclick="closeModal('leave-modal')">Cancel</button>
+                <button class="btn btn-success" onclick="submitLeaveRequest()">Submit Request</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 4. Add Student to Group Modal -->
+    <div id="add-student-modal" class="modal">
+        <div class="modal-content">
+            <h3><i class="fas fa-user-plus"></i> Add Student to Group</h3>
+            <div class="form-group">
+                <label>Select Student</label>
+                <select id="add-student-select" class="modern-input-field" style="padding:10px; border-radius:6px; border:1px solid var(--border-color);"></select>
+            </div>
+            <div class="modal-actions">
+                <button class="btn btn-danger" onclick="closeModal('add-student-modal')">Cancel</button>
+                <button class="btn btn-primary" onclick="confirmAddStudent()">Add</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Forgot Password Modal -->
+    <div id="forgot-modal" class="modal">
+        <div class="modal-content">
+            <h3>Reset Password</h3>
+            <div class="form-group">
+                <input type="text" id="forgot-user" placeholder="Enter your User ID">
+            </div>
+            <div class="form-group">
+                <input type="password" id="new-pass" placeholder="New Password">
+            </div>
+            <div class="modal-actions">
+                <button class="btn btn-danger" onclick="closeModal('forgot-modal')">Cancel</button>
+                <button class="btn btn-success" onclick="resetPassword()">Reset</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        /* ================= STATE & DATA GENERATION ================= */
+
+        const getAvatar = (seed) => `https://picsum.photos/seed/${seed}/200/200`;
+
+        const generateUsers = () => {
+            let users = [];
+            // HOD & OA
+            users.push({ id: 200, name: "Dr. HOD Karan", username: "hod1", password: "123", role: "hod", college: "Chandigarh University", dept: "Engineering", uid: "HOD01", photo: getAvatar('hod1'), email: "hod1@cuchd.in", phone: "+91 98765 43210", location: "Admin Block", joinDate: "Jan 2020" });
+            users.push({ id: 300, name: "OA Preet", username: "oa1", password: "123", role: "oa", college: "Chandigarh University", dept: "Office", uid: "OA01", photo: getAvatar('oa1'), email: "oa1@cuchd.in", phone: "+91 98765 43211", location: "Office Block", joinDate: "Mar 2021" });
+
+            // HARDCODED FACULTY
+            users.push({
+                id: 1, name: "Dr. Nancy Jyani", username: "E14746", password: "123", role: "employee",
+                college: "Chandigarh University", dept: "Management", uid: "E14746", block: "Block A",
+                photo: getAvatar('nancy'), email: "nancy.jyani@cuchd.in", phone: "+91 98765 43201",
+                location: "Block A, Room 101", joinDate: "Jan 2020"
+            });
+            users.push({
+                id: 2, name: "Dr. Niteesh Kumar", username: "E19002", password: "123", role: "employee",
+                college: "Chandigarh University", dept: "Computer Science", uid: "E19002", block: "Block B",
+                photo: getAvatar('niteesh'), email: "niteesh.kumar@cuchd.in", phone: "+91 98765 43202",
+                location: "Block B, Room 202", joinDate: "Feb 2021"
+            });
+            users.push({
+                id: 3, name: "Ms. Radhika", username: "E19725", password: "123", role: "employee",
+                college: "Chandigarh University", dept: "Law", uid: "E19725", block: "Block C",
+                photo: getAvatar('radhika'), email: "radhika@cuchd.in", phone: "+91 98765 43203",
+                location: "Block C, Room 305", joinDate: "Mar 2022"
+            });
+            users.push({
+                id: 4, name: "Ms. Navita", username: "E12163", password: "123", role: "employee",
+                college: "Chandigarh University", dept: "Engineering", uid: "E12163", block: "Block D",
+                photo: getAvatar('navita'), email: "navita@cuchd.in", phone: "+91 98765 43204",
+                location: "Block D, Room 102", joinDate: "Jan 2023"
+            });
+
+            const empNames = ["Jagender Pal Singh", "Prof. Simran Kaur"];
+            for (let i = 0; i < 2; i++) {
+                users.push({
+                    id: 5 + i,
+                    name: empNames[i],
+                    username: `emp${5 + i}`,
+                    password: "123",
+                    role: "employee",
+                    college: "Chandigarh University",
+                    dept: "Computer Science",
+                    uid: `EMP${(5 + i).toString().padStart(3, '0')}`,
+                    block: ["Block E", "Block F"][i],
+                    photo: getAvatar(`emp${5 + i}`),
+                    email: `emp${5 + i}@cuchd.in`,
+                    phone: `+91 98765 432${10 + i}`,
+                    location: `Block ${String.fromCharCode(69 + 5 + i)}, Room ${10 + i}`,
+                    joinDate: "Jan 2023"
+                });
+            }
+
+            // STUDENTS
+            const studentNames = ["Rahul Kumar", "Sneha Gupta", "Amanreet Singh", "Pitam Singh", "Gopal Saroo"];
+            for (let i = 1; i <= 5; i++) {
+                users.push({
+                    id: 100 + i,
+                    name: studentNames[i - 1],
+                    username: `stu${i}`,
+                    password: "123",
+                    role: "student",
+                    college: "Chandigarh University",
+                    dept: "Computer Science",
+                    uid: `STU${i.toString().padStart(3, '0')}`,
+                    studentCode: `2023-CS-${i.toString().padStart(3, '0')}`,
+                    photo: getAvatar(`stu${i}`),
+                    allottedTeacherId: (i % 5) + 1,
+                    email: `stu${i}@cuchd.in`,
+                    gmail: `student${i}@gmail.com`,
+                    phone: `+91 99887 766${5 + i}`,
+                    location: "Hostel A",
+                    joinDate: "Aug 2023",
+                    section: ["A", "B", "C"][i % 3],
+                    fatherName: `Father ${i}`,
+                    otherName: `Mother ${i}`,
+                    cgpa: (8.0 + Math.random() * 1.9).toFixed(2)
+                });
+            }
+            return users;
+        };
+
+        const timetableSlots = [
+            "09:30 - 10:20",
+            "10:20 - 11:10",
+            "Short Break",
+            "11:20 - 12:10",
+            "12:10 - 13:05",
+            "13:05 - 13:55",
+            "13:55 - 14:45",
+            "14:45 - 15:35",
+            "15:35 - 16:25"
+        ];
+
+        const timetableData = [
+            { userId: 1, day: "Monday", time: "09:30 - 10:20", subject: "Data Structures", courseCode: "CSE-201", block: "A Block", room: "Lab 101" },
+            { userId: 1, day: "Monday", time: "10:20 - 11:10", subject: "Algorithms", courseCode: "CSE-202", block: "B Block", room: "Room 205" },
+            { userId: 1, day: "Tuesday", time: "13:05 - 13:55", subject: "Web Dev", courseCode: "CSE-305", block: "A Block", room: "Lab A" },
+            { userId: 2, day: "Monday", time: "09:30 - 10:20", subject: "Physics", courseCode: "PHY-101", block: "C Block", room: "Lab 102" },
+            { userId: 2, day: "Wednesday", time: "11:20 - 12:10", subject: "Mechanics", courseCode: "ME-201", block: "C Block", room: "Hall 2" },
+        ];
+
+        let attendanceData = JSON.parse(localStorage.getItem('fms_attendance')) || [];
+        let studentUpdates = JSON.parse(localStorage.getItem('fms_student_updates')) || [];
+        // New state for teacher student groups: { teacherId: [studentId1, studentId2...] }
+        let teacherStudentGroups = JSON.parse(localStorage.getItem('fms_teacher_groups')) || {};
+
+        let groupChatMessages = JSON.parse(localStorage.getItem('fms_chat')) || [
+            { id: 1, senderId: 1, senderName: "Dr. Nancy Jyani", text: "Welcome to the group! Please check the timetable.", time: "10:00 AM" }
+        ];
+
+        let leaveRequests = JSON.parse(localStorage.getItem('fms_leave_requests')) || [];
+
+        const notices = JSON.parse(localStorage.getItem('fms_notices')) || [
+            { id: 1, title: "Holiday Announcement", date: "Oct 25", content: "University will remain closed on account of Diwali." },
+            { id: 2, title: "Exam Schedule", date: "Oct 28", content: "Mid-term exams start from next Monday. Check portal." },
+            { id: 3, title: "Workshop", date: "Nov 02", content: "AI/ML Workshop at Block 5." }
+        ];
+
+        let availableClasses = JSON.parse(localStorage.getItem('fms_classes')) || ["CSE-A (Section 1)", "CSE-B (Section 2)", "ME-A (Section 1)", "ME-B (Section 2)", "Common (All)"];
+        let syllabusData = JSON.parse(localStorage.getItem('fms_syllabus')) || [];
+
+        let state = {
+            users: generateUsers(),
+            currentUser: null,
+            adjustments: JSON.parse(localStorage.getItem('fms_adjustments')) || [],
+            messages: JSON.parse(localStorage.getItem('fms_messages')) || [],
+            courses: JSON.parse(localStorage.getItem('fms_courses')) || [],
+            studentUpdates: studentUpdates,
+            groupChat: groupChatMessages
+        };
+
+        let currentMsgTab = 'inbox';
+        let currentLeaveType = '';
+        let wifiConnected = false;
+        let editingUpdateId = null;
+        let viewTimetableForUserId = null;
+
+        function saveState() {
+            localStorage.setItem('fms_adjustments', JSON.stringify(state.adjustments));
+            localStorage.setItem('fms_messages', JSON.stringify(state.messages));
+            localStorage.setItem('fms_courses', JSON.stringify(state.courses));
+            localStorage.setItem('fms_users', JSON.stringify(state.users));
+            localStorage.setItem('fms_timetable', JSON.stringify(timetableData));
+            localStorage.setItem('fms_attendance', JSON.stringify(attendanceData));
+            localStorage.setItem('fms_student_updates', JSON.stringify(state.studentUpdates));
+            localStorage.setItem('fms_chat', JSON.stringify(state.groupChat));
+            localStorage.setItem('fms_notices', JSON.stringify(notices));
+            localStorage.setItem('fms_classes', JSON.stringify(availableClasses));
+            localStorage.setItem('fms_syllabus', JSON.stringify(syllabusData));
+            localStorage.setItem('fms_leave_requests', JSON.stringify(leaveRequests));
+            localStorage.setItem('fms_teacher_groups', JSON.stringify(teacherStudentGroups));
+        }
+
+        /* ================= THEME TOGGLE ================= */
+        function toggleTheme() {
+            const body = document.body;
+            const currentTheme = body.getAttribute('data-theme');
+            const icon = document.querySelector('.theme-toggle i');
+            if (currentTheme === 'dark') {
+                body.removeAttribute('data-theme');
+                icon.className = 'fas fa-moon';
+            } else {
+                body.setAttribute('data-theme', 'dark');
+                icon.className = 'fas fa-sun';
+            }
+        }
+
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('active');
+        }
+
+        /* ================= AUDIO NOTIFICATION ================= */
+        function playNotificationSound() {
+            try {
+                const ctx = new (window.AudioContext || window.webkitAudioContext)();
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(440, ctx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(880, ctx.currentTime + 0.1);
+                gain.gain.setValueAtTime(0.1, ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.5);
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+                osc.start();
+                osc.stop(ctx.currentTime + 0.5);
+            } catch (e) { console.log("Audio not supported"); }
+        }
+
+        /* ================= AUTHENTICATION ================= */
+        const authView = document.getElementById('auth-view');
+        const dashboardView = document.getElementById('dashboard-view');
+        const loginForm = document.getElementById('login-form');
+
+        loginForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const role = document.getElementById('login-role').value;
+            const user = document.getElementById('login-user').value;
+            const pass = document.getElementById('login-pass').value;
+            const account = state.users.find(u => (u.username === user || u.uid === user) && u.password === pass && u.role === role);
+            if (account) login(account);
+               else showToast("Invalid ID, Password, or Role!");
+        });
+
+        function updateLoginPlaceholder() {
+            const role = document.getElementById('login-role').value;
+            const input = document.getElementById('login-user');
+            if (role === 'employee') input.placeholder = "e.g., E14746 or emp5";
+            else if (role === 'hod') input.placeholder = "e.g., hod1";
+            else if (role === 'oa') input.placeholder = "e.g., oa1";
+            else if (role === 'student') input.placeholder = "e.g., stu1";
+        }
+
+        function login(user) {
+            state.currentUser = user;
+            authView.style.display = 'none';
+            dashboardView.style.display = 'flex';
+            document.getElementById('user-name-display').innerText = user.name;
+            document.getElementById('user-role-display').innerText = user.role.toUpperCase();
+
+            updateSidebarAvatar(user.photo);
+
+            cleanOldData();
+
+            let unreadCount = 0;
+            if (user.role === 'student') {
+                unreadCount = state.studentUpdates.filter(u => !u.read).length;
+            } else {
+                unreadCount = state.messages.filter(m => m.toId === user.id && !m.read).length;
+                unreadCount += state.adjustments.filter(a => a.toId === user.id && a.status === 'Pending').length;
+                unreadCount += leaveRequests.filter(l => l.status === 'Pending').length;
+            }
+
+            if (unreadCount > 0) setTimeout(() => playNotificationSound(), 1000);
+
+            setupSidebar();
+            loadSection('dashboard');
+            showToast(`Welcome, ${user.name}`);
+            updateHeaderDate();
+            updateWeather();
+        }
+
+        function updateSidebarAvatar(photoUrl) {
+            const avatar = document.getElementById('sidebar-avatar');
+            if (photoUrl) { avatar.style.backgroundImage = `url(${photoUrl})`; avatar.innerHTML = ""; }
+            else { avatar.style.backgroundImage = 'none'; avatar.innerHTML = '<i class="fas fa-user"></i>'; }
+        }
+
+        function logout() {
+            state.currentUser = null; authView.style.display = 'flex'; dashboardView.style.display = 'none'; document.getElementById('login-form').reset();
+            wifiConnected = false;
+        }
+
+        function openForgotModal() { document.getElementById('forgot-modal').style.display = 'flex'; }
+
+        function resetPassword() {
+            const uid = document.getElementById('forgot-user').value;
+            const newP = document.getElementById('new-pass').value;
+            const user = state.users.find(u => u.username === uid || u.uid === uid);
+            if (user && newP) { user.password = newP; saveState(); showToast("Password Reset!"); closeModal('forgot-modal'); }
+            else showToast("User not found.");
+        }
+
+        function closeModal(id) { document.getElementById(id).style.display = 'none'; }
+
+        /* ================= AUTO-DELETION LOGIC (48 Hours) ================= */
+        function cleanOldData() {
+            const now = Date.now();
+            const twoDaysMs = 48 * 60 * 60 * 1000;
+
+            const initialAdjCount = state.adjustments.length;
+            state.adjustments = state.adjustments.filter(a => {
+                if (!a.timestamp) return true;
+                return (now - new Date(a.timestamp).getTime()) <= twoDaysMs;
+            });
+            if (state.adjustments.length < initialAdjCount) saveState();
+
+            const initialMsgCount = state.messages.length;
+            state.messages = state.messages.filter(m => {
+                if (!m.timestamp) return true;
+                return (now - new Date(m.timestamp).getTime()) <= twoDaysMs;
+            });
+            if (state.messages.length < initialMsgCount) saveState();
+        }
+
+        /* ================= DROPDOWNS ================= */
+        function toggleDropdown(id) {
+            const allDropdowns = document.querySelectorAll('.dropdown-menu');
+            allDropdowns.forEach(d => { if (d.id !== id) d.style.display = 'none'; });
+            const dd = document.getElementById(id);
+            dd.style.display = dd.style.display === 'block' ? 'none' : 'block';
+            if (id === 'notif-dropdown' && dd.style.display === 'block') renderNotificationList();
+        }
+
+        function closeAllDropdowns() {
+            document.querySelectorAll('.dropdown-menu').forEach(d => d.style.display = 'none');
+        }
+
+        window.onclick = function (event) {
+            if (!event.target.closest('.dropdown-wrapper') && !event.target.closest('.icon-btn-header')) { closeAllDropdowns(); }
+        }
+
+        function updateNotificationCount() {
+            const user = state.currentUser;
+            if (!user) return;
+            let count = 0;
+            if (user.role === 'student') {
+                count = state.studentUpdates.filter(u => !u.read).length + state.groupChat.filter(m => m.senderId !== user.id).length;
+            } else {
+                count += state.messages.filter(m => m.toId === user.id && !m.read).length;
+                count += state.adjustments.filter(a => a.toId === user.id && a.status === 'Pending').length;
+                count += leaveRequests.filter(l => l.status === 'Pending').length;
+            }
+
+            const badge = document.getElementById('notif-count');
+            badge.innerText = count;
+            badge.style.display = count > 0 ? 'inline-block' : 'none';
+        }
+
+        function renderNotificationList() {
+            const user = state.currentUser;
+            const list = document.getElementById('notif-list-dropdown');
+            list.innerHTML = '';
+
+            if (user.role === 'student') {
+                const updates = state.studentUpdates.filter(u => !u.read).slice(0, 5);
+                updates.forEach(u => {
+                    const teacher = state.users.find(usr => usr.id === u.teacherId);
+                    list.innerHTML += `<a class="dropdown-item" onclick="loadSection('student-updates'); closeAllDropdowns();"><i class="fas fa-book" style="color:var(--primary)"></i> Class Update: ${u.title} from ${teacher ? teacher.name : 'Teacher'}</a>`;
+                });
+            } else {
+                const msgs = state.messages.filter(m => m.toId === user.id && !m.read).slice(0, 3);
+                msgs.forEach(m => {
+                    const fromUser = state.users.find(u => u.id === m.fromId);
+                    list.innerHTML += `<a class="dropdown-item" onclick="loadSection('messages'); closeAllDropdowns();"><i class="fas fa-envelope" style="color:var(--primary)"></i> Msg: ${m.subject} from ${fromUser ? fromUser.name : 'System'}</a>`;
+                });
+                const pendingLeaves = leaveRequests.filter(l => l.status === 'Pending').slice(0, 3);
+                pendingLeaves.forEach(l => {
+                    const reqUser = state.users.find(u => u.id === l.userId);
+                    list.innerHTML += `<a class="dropdown-item" onclick="loadSection('dashboard'); closeAllDropdowns();"><i class="fas fa-user-clock" style="color:var(--warning)"></i> Leave Req: ${reqUser ? reqUser.name : 'User'}</a>`;
+                });
+            }
+
+            if (list.innerHTML === '') {
+                list.innerHTML = '<a class="dropdown-item" style="color:grey; cursor:default;">No new notifications</a>';
+            }
+        }
+
+        /* ================= ROUTING & SIDEBAR ================= */
+        const menuContainer = document.getElementById('menu-container');
+        const contentArea = document.getElementById('content-area');
+
+        function setupSidebar() {
+            const role = state.currentUser.role;
+            let items = [];
+
+            if (role === 'student') {
+                items = [
+                    { id: 'dashboard', icon: 'fa-tachometer-alt', label: 'Dashboard' },
+                    { id: 'timetable', icon: 'fa-calendar-alt', label: 'Timetable' },
+                    { id: 'messages', icon: 'fa-comments', label: 'Group Chat' },
+                    { id: 'student-updates', icon: 'fa-bell', label: 'Daily Updates' },
+                    { id: 'profile', icon: 'fa-id-card', label: 'My Profile' }
+                ];
+            } else {
+                items = [
+                    { id: 'dashboard', icon: 'fa-tachometer-alt', label: 'Dashboard' },
+                    { id: 'attendance', icon: 'fa-calendar-check', label: 'My Attendance' },
+                    { id: 'timetable', icon: 'fa-calendar-alt', label: 'Timetable' },
+                    { id: 'adjustments', icon: 'fa-exchange-alt', label: 'Adjustments' },
+                    { id: 'messages', icon: 'fa-envelope', label: 'Messages' },
+                    { id: 'class-update', icon: 'fa-chalkboard-teacher', label: 'Class Update' },
+                    { id: 'profile', icon: 'fa-id-card', label: 'My Profile' }
+                ];
+
+                if (role === 'hod' || role === 'oa') {
+                    const classUpdateIdx = items.findIndex(i => i.id === 'class-update');
+                    items.splice(classUpdateIdx, 0, { id: 'syllabus', icon: 'fa-book', label: 'Syllabus' });
+                }
+            }
+
+            menuContainer.innerHTML = items.map(item => `<div class="menu-item" onclick="loadSection('${item.id}', this)"><i class="fas ${item.icon}"></i> ${item.label}</div>`).join('');
+            if (menuContainer.children[0]) menuContainer.children[0].classList.add('active');
+        }
+
+        function loadSection(sectionId, el) {
+            if (el) { document.querySelectorAll('.menu-item').forEach(i => i.classList.remove('active')); el.classList.add('active'); }
+            if (window.innerWidth <= 900) document.getElementById('sidebar').classList.remove('active');
+
+            switch (sectionId) {
+                case 'dashboard': renderDashboard(); break;
+                case 'attendance': renderAttendanceView(); break;
+                case 'timetable': renderTimetable(); break;
+                case 'adjustments': renderAdjustments(); break;
+                case 'messages': renderMessages(); break;
+                case 'class-update': renderClassUpdate(); break;
+                case 'syllabus': renderSyllabus(); break;
+                case 'student-updates': renderStudentUpdates(); break;
+                case 'profile': renderProfile(); break;
+                default: contentArea.innerHTML = `<h2>Section Under Construction</h2>`;
+            }
+        }
+
+        /* ================= RENDERERS ================= */
+
+        function updateHeaderDate() {
+            const dateOptions = { weekday: 'short', month: 'short', day: 'numeric' };
+            const dateStr = new Date().toLocaleDateString('en-US', dateOptions).toUpperCase();
+            const dateEl = document.getElementById('header-date');
+            if (dateEl) dateEl.innerText = dateStr;
+        }
+        setInterval(updateHeaderDate, 60000);
+
+        function updateWeather() {
+            const weatherEl = document.getElementById('weather-text');
+            const hour = new Date().getHours();
+            let temp = 26;
+            let icon = 'fa-sun';
+
+            if (hour >= 18 || hour < 6) { temp = 22; icon = 'fa-moon'; }
+            else if (hour >= 12 && hour < 16) { temp = 30; icon = 'fa-sun'; }
+            temp += Math.floor(Math.random() * 3) - 1;
+
+            if (weatherEl) {
+                weatherEl.previousElementSibling.className = `fas ${icon} weather-icon`;
+                weatherEl.innerText = `${temp}°C`;
+            }
+        }
+
+        function renderDashboard() {
+            const user = state.currentUser;
+
+            if (user.role === 'student') {
+                renderStudentDashboard();
+                return;
+            }
+
+            // Calculate workload based on Attendance (Sum of hours where present)
+            // Assuming each present day = 8 hours for simplicity of calculation or based on timetable
+            // Here we simulate a weekly load calculation based on random data + logic
+            const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+            
+            // Logic: If I have attendance marked, calculate hours, else random for demo
+            const barGraphHTML = days.map(day => {
+                let hours = 0;
+                // Simple logic: if it's a weekday and user is employee, assume some base load + random
+                if (day !== 'Sun') {
+                    hours = (Math.random() * (9 - 5) + 5).toFixed(1);
+                }
+                const heightPercent = ((hours) / 10) * 100; 
+                return `
+                    <div class="bar-col">
+                        <div class="bar" style="height: ${Math.min(heightPercent, 100)}%;" data-val="${hours}h"></div>
+                        <div class="bar-label">${day}</div>
+                    </div>
+                `;
+            }).join('');
+
+            let noticeFormHTML = '';
+            if (user.role === 'hod' || user.role === 'oa') {
+                noticeFormHTML = `
+                    <div style="margin-bottom:15px; background:rgba(220, 38, 38, 0.05); padding:10px; border-radius:8px; border:1px solid #fca5a5;">
+                        <h4 style="margin-bottom:8px; color:var(--primary); font-size:0.85rem;">Post New Notice</h4>
+                        <form onsubmit="postNewNotice(event)" style="display:flex; gap:8px; align-items:flex-end; flex-wrap:wrap;">
+                            <div style="flex:1;"><input type="text" id="notice-title" class="msg-input" placeholder="Title" required style="padding:6px;"></div>
+                            <div style="flex:1;"><input type="text" id="notice-content" class="msg-input" placeholder="Content" required style="padding:6px;"></div>
+                            <div style="flex:0 0 120px;">
+                                <input type="file" id="notice-file" accept=".pdf,.jpg,.jpeg,.png" class="msg-input" style="padding:4px; font-size:0.75rem;">
+                            </div>
+                            <button type="submit" class="btn btn-success btn-sm">Post</button>
+                        </form>
+                    </div>
+                `;
+            }
+
+            const noticesHTML = notices.map(n => `
+                <div style="padding:6px 0; border-bottom:1px solid var(--border-color); font-size:0.8rem;">
+                    <div style="font-weight:bold; color:var(--accent); display:flex; justify-content:space-between;">
+                        ${n.title} <span style="font-weight:normal; font-size:0.7rem; background:var(--bg-body); padding:1px 4px; border-radius:3px;">${n.date}</span>
+                    </div>
+                    <div style="color:var(--text-grey); margin-top:3px; line-height:1.3;">${n.content}</div>
+                    ${n.file ? `<div style="margin-top:3px;"><a href="${n.fileUrl}" target="_blank" style="color:var(--primary); font-size:0.7rem; text-decoration:underline;">Download</a></div>` : ''}
+                </div>
+            `).join('');
+
+            let leaveApprovalHTML = '';
+            if (user.role === 'hod' || user.role === 'oa') {
+                const pendingLeaves = leaveRequests.filter(l => l.status === 'Pending');
+                if (pendingLeaves.length > 0) {
+                    leaveApprovalHTML = `
+                        <div class="widget-card" style="border-top: 4px solid var(--warning); margin-top: 1rem;">
+                            <div class="widget-title">Pending Leaves <span style="background:var(--warning); color:white; padding:2px 6px; border-radius:10px; font-size:0.7rem;">${pendingLeaves.length}</span></div>
+                            <div class="leave-approvals-widget" style="max-height: 200px; overflow-y: auto;">
+                                ${pendingLeaves.map(l => {
+                        const reqUser = state.users.find(u => u.id === l.userId);
+                        return `
+                                    <div class="leave-request-row" style="display:flex; justify-content:space-between; align-items:center; background:var(--card-bg); padding:6px; border-radius:4px; margin-bottom:5px; border:1px solid var(--border-color); font-size:0.8rem;">
+                                        <div>
+                                            <strong>${reqUser ? reqUser.name : 'Unknown'}</strong> (${l.type})<br>
+                                            <small>${l.date}</small>
+                                        </div>
+                                        <div>
+                                            <button class="action-btn btn-approve" onclick="processLeave(${l.id}, 'Approved')" title="Approve"><i class="fas fa-check"></i></button>
+                                            <button class="action-btn btn-reject" onclick="processLeave(${l.id}, 'Rejected')" title="Reject"><i class="fas fa-times"></i></button>
+                                        </div>
+                                    </div>`;
+                    }).join('')}
+                            </div>
+                        </div>
+                    `;
+                }
+            }
+
+            contentArea.innerHTML = `
+                <h2 class="header-title" style="margin-bottom:10px; font-size:1.1rem; flex-shrink:0;">Dashboard</h2>
+                
+                <div class="dashboard-top-row">
+                    <div class="card" style="margin:0; display:flex; flex-direction:column; height:100%;">
+                        <div class="card-header" style="margin-bottom:5px; padding-bottom:5px;">
+                            <h3 style="margin:0; color:var(--primary); font-size:0.9rem; border-bottom:none;"><i class="fas fa-bullhorn"></i> Notice Board</h3>
+                        </div>
+                        ${noticeFormHTML}
+                        <div style="overflow-y:auto; flex:1; padding-right:5px;">
+                            ${noticesHTML}
+                        </div>
+                    </div>
+                    <div class="widget-card">
+                        <div class="widget-title">Workday Load</div>
+                        <div class="bar-chart-container">
+                            ${barGraphHTML}
+                        </div>
+                    </div>
+                    <div class="calendar-widget" style="background:var(--card-bg); border-radius:var(--radius); box-shadow:var(--shadow); padding:10px; display:flex; flex-direction:column; height:100%; border:1px solid var(--border-color);">
+                        <div class="calendar-header" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                            <h4 style="margin:0; color:var(--primary); font-size:0.85rem;"><i class="fas fa-calendar-alt"></i> Attendance</h4>
+                            <input type="month" id="dash-cal-month" onchange="renderDashboardCalendar(this.value)" style="border:1px solid var(--border-color); border-radius:4px; padding:2px; font-size:0.75rem;">
+                        </div>
+                        <div class="calendar-grid" id="dash-cal-grid" style="display:grid; grid-template-columns:repeat(7,1fr); gap:2px; flex:1;"></div>
+                        <div style="margin-top:5px; display:flex; gap:5px; font-size:0.6rem; justify-content:center; flex-wrap:wrap;">
+                            <span style="display:flex; align-items:center; gap:2px;"><div style="width:8px; height:8px; background:#dcfce7; border:none;"></div> P</span>
+                            <span style="display:flex; align-items:center; gap:2px;"><div style="width:8px; height:8px; background:#fee2e2; border:none;"></div> A</span>
+                            <span style="display:flex; align-items:center; gap:2px;"><div style="width:8px; height:8px; background:var(--card-bg); border:1px solid var(--border-color);"></div> --</span>
+                        </div>
+                    </div>
+                </div>
+
+                ${leaveApprovalHTML ? `<div style="margin-top: 10px;">${leaveApprovalHTML}</div>` : ''}
+            `;
+
+            const todayStr = new Date().toISOString().split('T')[0];
+            document.getElementById('dash-cal-month').value = todayStr.substring(0, 7);
+            renderDashboardCalendar(todayStr.substring(0, 7));
+        }
+
+        function postNewNotice(e) {
+            e.preventDefault();
+            const title = document.getElementById('notice-title').value;
+            const content = document.getElementById('notice-content').value;
+            const fileInput = document.getElementById('notice-file');
+            let fileUrl = null;
+
+            if (fileInput.files && fileInput.files[0]) {
+                fileUrl = URL.createObjectURL(fileInput.files[0]);
+            }
+
+            const newNotice = {
+                id: Date.now(),
+                title, content,
+                file: fileInput.files[0] ? fileInput.files[0].name : null,
+                fileUrl: fileUrl,
+                date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+            };
+
+            notices.unshift(newNotice);
+            saveState();
+            showToast("Notice Posted!");
+            document.getElementById('notice-title').parentElement.reset();
+            renderDashboard();
+        }
+
+        function renderDashboardCalendar(yearMonth) {
+            const container = document.getElementById('dash-cal-grid');
+            if (!container) return;
+            container.innerHTML = '';
+
+            ['S', 'M', 'T', 'W', 'T', 'F', 'S'].forEach(d => container.innerHTML += `<div class="cal-day-name" style="text-align:center; font-weight:700; color:var(--text-grey); font-size:0.6rem;">${d}</div>`);
+
+            const [year, month] = yearMonth.split('-');
+            const daysInMonth = new Date(year, month, 0).getDate();
+            const firstDayIndex = new Date(year, month - 1, 1).getDay();
+            const todayStr = new Date().toISOString().split('T')[0];
+
+            for (let i = 0; i < firstDayIndex; i++) container.innerHTML += `<div class="cal-cell empty"></div>`;
+
+            for (let d = 1; d <= daysInMonth; d++) {
+                const dateStr = `${year}-${month}-${d.toString().padStart(2, '0')}`;
+                const record = attendanceData.find(a => a.userId === state.currentUser.id && a.date === dateStr);
+
+                let cls = '';
+                if (record) {
+                    if (record.status === 'Present') cls = 'status-present';
+                    else if (record.status === 'Absent') cls = 'status-absent';
+                    else cls = 'status-short';
+                }
+
+                const isToday = (dateStr === todayStr) ? 'today' : '';
+                container.innerHTML += `<div class="cal-cell ${cls} ${isToday}">${d}</div>`;
+            }
+        }
+
+        /* --- STUDENT DASHBOARD --- */
+        function renderStudentDashboard() {
+            const user = state.currentUser;
+            const teacher = state.users.find(u => u.id === user.allottedTeacherId);
+
+            contentArea.innerHTML = `
+                <h2 class="header-title" style="margin-bottom:10px;">Student Dashboard</h2>
+                <div class="dashboard-bottom-row" style="grid-template-columns: repeat(3, 1fr); margin-bottom:15px;">
+                    <div class="widget-card">
+                        <div style="text-align:center;">
+                            <h3 style="color:var(--primary); font-size:1.1rem;">${teacher ? teacher.name : 'N/A'}</h3>
+                            <p style="font-size:0.75rem; color:var(--text-grey);">Class Teacher</p>
+                        </div>
+                    </div>
+                    <div class="widget-card">
+                        <div class="counter-box" style="text-align:center;">
+                            <div class="counter-val" style="color:var(--accent); font-size:1.5rem; font-weight:700;">${state.studentUpdates.length}</div>
+                            <div class="counter-label" style="font-size:0.75rem; color:var(--text-grey);">Daily Updates</div>
+                        </div>
+                    </div>
+                    <div class="widget-card">
+                         <div class="counter-box" style="text-align:center;">
+                            <div class="counter-val" style="color:var(--success); font-size:1.5rem; font-weight:700;">${attendanceData.filter(a => a.userId === user.id && a.status === 'Present').length}</div>
+                            <div class="counter-label" style="font-size:0.75rem; color:var(--text-grey);">Days Present</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card" style="height:calc(45% - 20px);">
+                    <div class="card-header"><h3 style="margin:0; font-size:0.9rem; color:var(--primary);"><i class="fas fa-bullhorn"></i> Recent Announcements</h3></div>
+                    <div style="overflow-y:auto; height:100%; padding-right:5px;">
+                        ${notices.map(n => `
+                            <div style="padding:8px 0; border-bottom:1px solid var(--border-color); font-size:0.8rem;">
+                                <div style="font-weight:bold; color:var(--primary);">${n.title} <span style="float:right; font-size:0.7rem; color:var(--text-grey);">${n.date}</span></div>
+                                <div style="color:var(--text-grey); margin-top:3px;">${n.content}</div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+        }
+
+        /* --- ATTENDANCE SECTION --- */
+        let localStream = null;
+
+        function isPortalOpen() {
+            const now = new Date();
+            const timeVal = now.getHours() + (now.getMinutes() / 60);
+            return timeVal >= 9.5 && timeVal <= 16.4166;
+        }
+
+        function renderAttendanceView() {
+            const user = state.currentUser;
+            const todayStr = new Date().toISOString().split('T')[0];
+            const todayRecord = attendanceData.find(a => a.userId === user.id && a.date === todayStr);
+            const pendingLeaveToday = leaveRequests.find(l => l.userId === user.id && l.date === todayStr && l.status === 'Pending');
+
+            const isRecorded = !!todayRecord;
+            const portalOpen = isPortalOpen();
+
+            if (user.role === 'student') {
+                const myTimetable = timetableData.filter(t => t.userId === user.id && t.day === getDayName(todayStr));
+                const contentHTML = myTimetable.length ? myTimetable.map(t => {
+                    const isAttended = attendanceData.find(a => a.userId === user.id && a.date === todayStr && a.timeSlot === t.time);
+                    return `
+                    <div style="display:flex; justify-content:space-between; align-items:center; background:var(--bg-body); padding:10px; border-radius:4px; margin-bottom:8px; border:1px solid var(--border-color);">
+                        <div style="flex:1;">
+                            <div style="font-weight:bold; color:var(--primary); font-size:0.9rem;">${t.subject}</div>
+                            <div style="font-size:0.75rem; color:var(--text-grey);">${t.time}</div>
+                        </div>
+                        ${isAttended
+                            ? `<span style="color:var(--success); font-weight:bold; font-size:0.8rem;">Present</span>`
+                            : `<button class="btn btn-primary btn-sm" onclick="markStudentAttendance('${t.time}', '${t.subject}')">Mark Present</button>`
+                        }
+                    </div>`;
+                }).join('') : '<p style="text-align:center; color:var(--text-grey); padding:10px; font-size:0.8rem;">No classes scheduled for today.</p>';
+
+                contentArea.innerHTML = `
+                    <h2 class="header-title" style="margin-bottom:10px;">My Attendance</h2>
+                    <div style="display:flex; flex-direction:column; gap:15px; height:100%; overflow-y:auto;">
+                        <div class="card" style="margin:0; background:var(--card-bg); padding:15px; border-radius:var(--radius); border:1px solid var(--border-color);">
+                            <h3 style="margin-bottom:10px; font-size:0.9rem;">Today's Schedule (${new Date().toDateString()})</h3>
+                            ${contentHTML}
+                        </div>
+                        
+                        <div class="card" style="margin:0; background:var(--card-bg); padding:15px; border-radius:var(--radius); border:1px solid var(--border-color);">
+                            <h3 style="margin-bottom:10px; font-size:0.9rem;">Attendance Log</h3>
+                            <div class="attendance-calendar-grid" style="grid-template-columns: repeat(7, 1fr); height:200px;">
+                                ${Array.from({ length: 30 }).map((_, i) => {
+                    const d = i + 1;
+                    const s = i % 7 === 0 ? 'status-absent' : 'status-present';
+                    return `<div class="cal-cell ${s}">${d}</div>`;
+                }).join('')}
+                            </div>
+                        </div>
+                    </div>
+                `;
+                return;
+            }
+
+            let actionAreaHTML = '';
+
+            if (!wifiConnected) {
+                if (!portalOpen && !isRecorded && !pendingLeaveToday) {
+                    actionAreaHTML = `
+                        <div style="color:var(--danger); font-weight:bold; margin-bottom:10px; background:#fee2e2; padding:8px; border-radius:4px; font-size:0.8rem;">
+                            <i class="fas fa-clock"></i> Portal Closed (9:30 - 16:25)
+                        </div>
+                        <button class="wifi-btn" disabled><i class="fas fa-wifi"></i> Portal Closed</button>
+                    `;
+                } else {
+                    actionAreaHTML = `
+                        <button class="wifi-btn" id="wifi-connect-btn" onclick="openWifiModal()" ${isRecorded || pendingLeaveToday ? 'disabled' : ''}>
+                            <i class="fas fa-wifi"></i> ${pendingLeaveToday ? 'Leave Pending' : (isRecorded ? 'Attendance Marked' : 'Connect to CU-Guest')}
+                        </button>
+                        ${isRecorded ? '<div style="margin-top:8px; font-weight:bold; color:var(--success); font-size:0.85rem;">Attendance recorded.</div>' : ''}
+                        ${pendingLeaveToday ? '<div style="margin-top:8px; font-weight:bold; color:var(--warning); font-size:0.85rem;">Leave request pending approval.</div>' : ''}
+                    `;
+                }
+            } else {
+                if (!portalOpen) {
+                    actionAreaHTML = `<div style="color:var(--danger); font-size:0.85rem;">Portal Time Over.</div>`;
+                } else {
+                    actionAreaHTML = `
+                        <div style="margin-bottom:8px; color:var(--success); font-weight:bold; font-size:0.85rem;"><i class="fas fa-check-circle"></i> Connected</div>
+                        <button class="wifi-btn" onclick="openCameraModal()" ${isRecorded || pendingLeaveToday ? 'disabled' : ''}>
+                            <i class="fas fa-camera"></i> ${pendingLeaveToday ? 'Leave Pending' : (isRecorded ? 'Marked Today' : 'Mark Present')}
+                        </button>
+                    `;
+                }
+            }
+
+            // Leave Ledger with specific colors as requested
+            const leaveLedgerHTML = `
+                <div class="leave-ledger-section">
+                    <h3 style="margin-bottom:8px; color:var(--primary); font-size:0.9rem; border-bottom:1px solid var(--border-color); padding-bottom:4px;">LEAVE LEDGER</h3>
+                    <div class="ledger-grid">
+                        <div class="ledger-card">
+                            <div class="pie-chart" style="background: conic-gradient(var(--leave-short) 0% 30%, #e5e7eb 30% 100%);">
+                                <div class="pie-text"><span>1</span><span style="font-size:0.5rem;">/3</span></div>
+                            </div>
+                            <div class="ledger-details">
+                                <h4 style="font-size:0.75rem; margin:0; color: var(--leave-short);">Short Leave</h4>
+                                <p style="font-size:0.65rem; margin:0; color:var(--text-grey);">Used: <span style="color:var(--leave-short); font-weight:bold;">1</span> / 3</p>
+                            </div>
+                        </div>
+                        <div class="ledger-card">
+                            <div class="pie-chart" style="background: conic-gradient(var(--leave-medical) 0% 20%, #e5e7eb 20% 100%);">
+                                <div class="pie-text"><span>2</span><span style="font-size:0.5rem;">/10</span></div>
+                            </div>
+                            <div class="ledger-details">
+                                <h4 style="font-size:0.75rem; margin:0; color: var(--leave-medical);">Medical Leave</h4>
+                                <p style="font-size:0.65rem; margin:0; color:var(--text-grey);">Used: <span style="color:var(--leave-medical); font-weight:bold;">2</span> / 10</p>
+                            </div>
+                        </div>
+                        <div class="ledger-card">
+                            <div class="pie-chart" style="background: conic-gradient(var(--leave-half) 0% 40%, #e5e7eb 40% 100%);">
+                                <div class="pie-text"><span>2</span><span style="font-size:0.5rem;">/5</span></div>
+                            </div>
+                            <div class="ledger-details">
+                                <h4 style="font-size:0.75rem; margin:0; color: var(--leave-half);">Half Day</h4>
+                                <p style="font-size:0.65rem; margin:0; color:var(--text-grey);">Used: <span style="color:var(--leave-half); font-weight:bold;">2</span> / 5</p>
+                            </div>
+                        </div>
+                        <div class="ledger-card">
+                            <div class="pie-chart" style="background: conic-gradient(var(--leave-casual) 0% 10%, #e5e7eb 10% 100%);">
+                                <div class="pie-text"><span>0</span><span style="font-size:0.5rem;">/2</span></div>
+                            </div>
+                            <div class="ledger-details">
+                                <h4 style="font-size:0.75rem; margin:0; color: var(--leave-casual);">Casual Leave</h4>
+                                <p style="font-size:0.65rem; margin:0; color:var(--text-grey);">Used: <span style="color:var(--leave-casual); font-weight:bold;">0</span> / 2</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            contentArea.innerHTML = `
+                <h2 class="header-title" style="margin-bottom:10px;">My Attendance</h2>
+                <div class="attendance-3-col-layout">
+                    <div class="att-action-card">
+                        <div class="att-header-prof">
+                            <h2 style="font-size:1.1rem; margin:0;">Mark Attendance</h2>
+                            <p style="font-size:0.8rem; color:var(--text-grey);">${new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}</p>
+                        </div>
+                        <div style="margin-bottom: 15px; flex:1; display:flex; flex-direction:column; justify-content:center;">${actionAreaHTML}</div>
+                        <div style="border-top: 1px solid var(--border-color); padding-top: 10px; width: 100%;">
+                            <h4 style="margin-bottom:8px; color:var(--secondary); font-size:0.8rem;">Applying for Leave?</h4>
+                            <div class="leave-options-grid">
+                                <button class="leave-btn short" onclick="openLeaveModal('Short Leave')" ${isRecorded || pendingLeaveToday ? 'disabled' : ''}><i class="fas fa-clock"></i> Short</button>
+                                <button class="leave-btn medical" onclick="openLeaveModal('Medical Leave')" ${isRecorded || pendingLeaveToday ? 'disabled' : ''}><i class="fas fa-briefcase-medical"></i> Med</button>
+                                <button class="leave-btn half" onclick="openLeaveModal('Half Day')" ${isRecorded || pendingLeaveToday ? 'disabled' : ''}><i class="fas fa-hourglass-half"></i> Half</button>
+                            </div>
+                        </div>
+                        <!-- Darker Disclaimer Box as requested -->
+                        <div class="disclaimer-box">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            <span><strong>Important:</strong> Leave requests require HOD/OA approval. Ensure correct dates.</span>
+                        </div>
+                    </div>
+                    
+                    <div class="att-action-card" style="border-top: 4px solid var(--warning);">
+                        ${leaveLedgerHTML}
+                    </div>
+
+                    <div class="att-action-card" style="padding: 10px; border-top: 4px solid var(--accent);">
+                        <div class="calendar-header" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                            <h3 style="margin:0; color:var(--primary); font-size:0.9rem;">Log</h3>
+                            <input type="month" id="att-cal-month" value="${todayStr.substring(0, 7)}" onchange="renderAttendanceCalendar(this.value)" style="border:1px solid var(--border-color); border-radius:4px; padding:2px; font-size:0.75rem;">
+                        </div>
+                        <div id="att-cal-grid" class="attendance-calendar-grid" style="flex: 1; min-height:0;"></div>
+                        <div style="margin-top:8px; display:flex; gap:10px; font-size:0.7rem; justify-content:center; padding-top:8px; border-top:1px solid var(--border-color); flex-wrap:wrap;">
+                            <span style="display:flex; align-items:center; gap:3px;"><div style="width:12px; height:12px; background:#dcfce7; border-radius:2px;"></div> Present</span>
+                            <span style="display:flex; align-items:center; gap:3px;"><div style="width:12px; height:12px; background:#fee2e2; border-radius:2px;"></div> Absent</span>
+                            <span style="display:flex; align-items:center; gap:3px;"><div style="width:12px; height:12px; background:var(--card-bg); border:1px solid var(--border-color); border-radius:2px;"></div> None</span>
+                            <span style="display:flex; align-items:center; gap:3px;"><div style="width:12px; height:12px; background:var(--leave-short); border-radius:2px;"></div> Short</span>
+                            <span style="display:flex; align-items:center; gap:3px;"><div style="width:12px; height:12px; background:var(--leave-medical); border-radius:2px;"></div> Med</span>
+                            <span style="display:flex; align-items:center; gap:3px;"><div style="width:12px; height:12px; background:var(--leave-half); border-radius:2px;"></div> Half</span>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            setTimeout(() => renderAttendanceCalendar(todayStr.substring(0, 7)), 100);
+        }
+
+        function openWifiModal() {
+            if (!isPortalOpen()) {
+                showToast("Portal is closed (9:30 - 16:25).");
+                return;
+            }
+            document.getElementById('wifi-modal').style.display = 'flex';
+            document.getElementById('wifi-id').value = '';
+            document.getElementById('wifi-pass').value = '';
+        }
+
+        function verifyWifiCredentials() {
+            const id = document.getElementById('wifi-id').value;
+            const pass = document.getElementById('wifi-pass').value;
+            const validUser = state.users.find(u => u.role === 'employee' && (u.username === id || u.uid === id) && u.password === pass);
+
+            if (validUser) {
+                wifiConnected = true;
+                closeModal('wifi-modal');
+                showToast("Connected to CU-Guest!");
+                renderAttendanceView();
+            } else {
+                showToast("Invalid Credentials");
+            }
+        }
+
+        function renderAttendanceCalendar(yearMonth) {
+            const container = document.getElementById('att-cal-grid');
+            if (!container) return;
+            container.innerHTML = '';
+
+            const [year, month] = yearMonth.split('-');
+            const daysInMonth = new Date(year, month, 0).getDate();
+            const firstDayIndex = new Date(year, month - 1, 1).getDay();
+            const todayStr = new Date().toISOString().split('T')[0];
+
+            const days = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
+            days.forEach(d => container.innerHTML += `<div style="text-align:center; font-weight:bold; color:var(--text-grey); font-size:0.7rem;">${d}</div>`);
+
+            for (let i = 0; i < firstDayIndex; i++) container.innerHTML += `<div></div>`;
+
+            for (let d = 1; d <= daysInMonth; d++) {
+                const dateStr = `${year}-${month}-${d.toString().padStart(2, '0')}`;
+                const record = attendanceData.find(a => a.userId === state.currentUser.id && a.date === dateStr);
+                let statusClass = 'status-none';
+                let content = `<span>${d}</span>`;
+
+                if (record) {
+                    if (record.status === 'Present') { statusClass = 'status-present'; }
+                    else if (record.status === 'Absent') { statusClass = 'status-absent'; }
+                    else if (record.status === 'Short Leave') { statusClass = 'status-short'; } // Map to orange
+                    else if (record.status === 'Medical Leave') { statusClass = 'status-medical'; } // Map to dark blue
+                    else if (record.status === 'Half Day') { statusClass = 'status-halfday'; } // Map to yellow-orange
+                    else if (record.status === 'Casual Leave') { statusClass = 'status-casual'; } // Map to purple
+                    else { statusClass = 'status-short'; }
+                }
+
+                const isToday = (dateStr === todayStr) ? 'today' : '';
+
+                container.innerHTML += `
+                    <div class="cal-cell ${statusClass} ${isToday}" title="${dateStr}: ${record ? record.status : 'No Data'}">
+                        ${content}
+                    </div>
+                `;
+            }
+        }
+
+        function openLeaveModal(type) {
+            const todayStr = new Date().toISOString().split('T')[0];
+            const exists = attendanceData.find(a => a.userId === state.currentUser.id && a.date === todayStr);
+            const pending = leaveRequests.find(l => l.userId === state.currentUser.id && l.date === todayStr && l.status === 'Pending');
+            if (exists || pending) {
+                showToast("Attendance/Leave already recorded or pending for today.");
+                return;
+            }
+
+            currentLeaveType = type;
+            document.getElementById('leave-modal').style.display = 'flex';
+            document.getElementById('leave-reason').value = '';
+
+            const singleDateGroup = document.getElementById('single-date-group');
+            const medicalDateGroup = document.getElementById('medical-date-group');
+            const timeGroup = document.getElementById('time-slot-group');
+            const timeSelect = document.getElementById('leave-time');
+
+            if (type === 'Medical Leave') {
+                singleDateGroup.style.display = 'none';
+                medicalDateGroup.style.display = 'block';
+                document.getElementById('leave-start-date').value = todayStr;
+                document.getElementById('leave-end-date').value = todayStr;
+                timeGroup.style.display = 'none';
+            } else {
+                singleDateGroup.style.display = 'block';
+                medicalDateGroup.style.display = 'none';
+                document.getElementById('leave-date').value = todayStr;
+
+                if (type === 'Short Leave') {
+                    timeGroup.style.display = 'block';
+                    timeSelect.innerHTML = `<option value="">Select Time</option>` +
+                        `<option value="09:30 - 11:10">09:30 - 11:10</option>` +
+                        `<option value="02:40 - 04:30">02:40 - 04:30</option>`;
+                } else if (type === 'Half Day') {
+                    timeGroup.style.display = 'block';
+                    timeSelect.innerHTML = `<option value="">Select Time</option>` +
+                        `<option value="09:30 - 12:10">09:30 - 12:10</option>` +
+                        `<option value="02:45 - 04:25">02:45 - 04:25</option>`;
+                } else {
+                    timeGroup.style.display = 'none';
+                }
+            }
+        }
+
+        function submitLeaveRequest() {
+            let dates = [];
+            let reason = document.getElementById('leave-reason').value;
+            let timeSlot = "Full Day";
+
+            if (currentLeaveType === 'Medical Leave') {
+                const start = document.getElementById('leave-start-date').value;
+                const end = document.getElementById('leave-end-date').value;
+                if (!start || !end) return showToast("Please select date range.");
+
+                let curr = new Date(start);
+                let last = new Date(end);
+                while (curr <= last) {
+                    dates.push(curr.toISOString().split('T')[0]);
+                    curr.setDate(curr.getDate() + 1);
+                }
+            } else {
+                const date = document.getElementById('leave-date').value;
+                if (!date) return showToast("Please select a date.");
+                dates.push(date);
+
+                if (currentLeaveType === 'Short Leave' || currentLeaveType === 'Half Day') {
+                    const selectedTime = document.getElementById('leave-time').value;
+                    if (!selectedTime) return showToast("Please select a time slot.");
+                    timeSlot = selectedTime;
+                }
+            }
+
+            dates.forEach(dateStr => {
+                leaveRequests.push({
+                    id: Date.now() + Math.random(),
+                    userId: state.currentUser.id,
+                    date: dateStr,
+                    type: currentLeaveType,
+                    timeSlot: timeSlot,
+                    reason: reason,
+                    status: 'Pending',
+                    timestamp: new Date().toISOString()
+                });
+            });
+
+            saveState();
+            showToast(`${currentLeaveType} submitted for approval.`);
+            closeModal('leave-modal');
+            renderAttendanceView();
+        }
+
+        function processLeave(id, status) {
+            const req = leaveRequests.find(l => l.id === id);
+            if (!req) return;
+
+            req.status = status;
+
+            if (status === 'Approved') {
+                attendanceData.push({
+                    userId: req.userId,
+                    date: req.date,
+                    status: req.type,
+                    timeSlot: req.timeSlot,
+                    reason: req.reason,
+                    timestamp: req.timestamp
+                });
+            }
+
+            saveState();
+            updateNotificationCount();
+            showToast(`Leave ${status}`);
+            renderDashboard();
+        }
+
+        async function startCamera() {
+            const videoEl = document.getElementById('live-video');
+            const captureBtn = document.getElementById('btn-capture');
+            try {
+                localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
+                videoEl.srcObject = localStream;
+                videoEl.style.display = 'block';
+                captureBtn.disabled = false;
+            } catch (err) {
+                showToast("Camera access denied.");
+                document.getElementById('camera-icon').style.display = 'block';
+                captureBtn.disabled = false;
+            }
+        }
+
+        function openCameraModal() {
+            document.getElementById('camera-modal').style.display = 'flex';
+            document.getElementById('camera-actions-start').style.display = 'flex';
+            document.getElementById('camera-actions-captured').style.display = 'none';
+            document.getElementById('captured-image').style.display = 'none';
+            document.getElementById('live-video').style.display = 'none';
+            startCamera();
+        }
+
+        function closeCameraModal() {
+            if (localStream) {
+                localStream.getTracks().forEach(track => track.stop());
+                localStream = null;
+            }
+            closeModal('camera-modal');
+        }
+
+        function captureSelfie() {
+            const videoEl = document.getElementById('live-video');
+            const img = document.getElementById('captured-image');
+            if (localStream) {
+                const canvas = document.createElement('canvas');
+                canvas.width = videoEl.videoWidth;
+                canvas.height = videoEl.videoHeight;
+                const ctx = canvas.getContext('2d');
+                ctx.translate(canvas.width, 0);
+                ctx.scale(-1, 1);
+                ctx.drawImage(videoEl, 0, 0);
+                img.src = canvas.toDataURL('image/png');
+                videoEl.style.display = 'none';
+                localStream.getTracks().forEach(track => track.stop());
+                localStream = null;
+            } else {
+                img.src = getAvatar('selfie' + Date.now());
+            }
+            img.style.display = 'block';
+            document.getElementById('camera-actions-start').style.display = 'none';
+            document.getElementById('camera-actions-captured').style.display = 'flex';
+        }
+
+        function retakeSelfie() {
+            document.getElementById('captured-image').style.display = 'none';
+            document.getElementById('camera-actions-start').style.display = 'flex';
+            document.getElementById('camera-actions-captured').style.display = 'none';
+            startCamera();
+        }
+
+        function confirmAttendance() {
+            const todayStr = new Date().toISOString().split('T')[0];
+            attendanceData = attendanceData.filter(a => !(a.userId === state.currentUser.id && a.date === todayStr));
+            attendanceData.push({ userId: state.currentUser.id, date: todayStr, status: 'Present', timestamp: new Date().toISOString() });
+            saveState();
+            showToast("Attendance Marked!");
+            closeCameraModal();
+            renderAttendanceView();
+        }
+
+        /* --- ADJUSTMENTS --- */
+        function renderAdjustments() {
+            const user = state.currentUser;
+
+            const myRequestsRaw = state.adjustments.filter(a => a.fromId === user.id);
+            myRequestsRaw.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+            const incomingRequestsRaw = state.adjustments.filter(a => a.toId === user.id);
+            incomingRequestsRaw.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+            const renderMyRequestRow = (a) => {
+                const assignedUser = state.users.find(u => u.id === a.toId);
+                const assigneeInfo = assignedUser ? `${assignedUser.name} (${assignedUser.uid})` : 'Unknown';
+                const myPhoto = user ? user.photo : getAvatar('unknown');
+
+                // NO ACTION BUTTONS for sent requests as per requirement
+                return `
+                    <tr>
+                        <td style="font-size:0.8rem;">${a.date}</td>
+                        <td style="font-size:0.8rem;">${a.timeSlot}</td>
+                        <td style="text-align:center; font-size:0.8rem;">
+                             <img src="${myPhoto}" class="adj-photo-cell" style="width:30px; height:30px; border-radius:50%; object-fit:cover; border:1px solid #ddd;">
+                             <div>${assigneeInfo}</div>
+                        </td>
+                        <td style="font-size:0.8rem;">${a.reason}</td>
+                        <td style="font-size:0.8rem; font-weight:bold; color:${a.status === 'Pending' ? 'orange' : (a.status === 'Approved' ? 'green' : 'red')}">${a.status}</td>
+                    </tr>`;
+            };
+
+            const renderIncomingRow = (a) => {
+                const sender = state.users.find(u => u.id === a.fromId);
+                const senderInfo = sender ? `${sender.name} (${sender.uid})` : 'Unknown User';
+                const senderPhoto = sender ? sender.photo : getAvatar('unknown');
+
+                let actions = '';
+                if (a.status === 'Pending') {
+                    actions = `<button class="action-btn btn-approve" onclick="processAdjustment(${a.id}, 'Approved')"><i class="fas fa-check"></i></button><button class="action-btn btn-reject" onclick="processAdjustment(${a.id}, 'Rejected')"><i class="fas fa-times"></i></button>`;
+                }
+                return `
+                    <tr>
+                        <td style="font-size:0.8rem;">${a.date}</td>
+                        <td style="font-size:0.8rem;">${a.timeSlot}</td>
+                        <td style="text-align:center; font-size:0.8rem;">
+                            <img src="${senderPhoto}" class="adj-photo-cell" style="width:30px; height:30px; border-radius:50%; object-fit:cover; border:1px solid #ddd;">
+                            <div style="font-weight:bold; color:var(--primary); font-size:0.75rem;">${senderInfo}</div>
+                        </td>
+                        <td style="font-size:0.8rem;">${a.reason}</td>
+                        <td style="font-size:0.8rem;"><span style="font-weight:bold; color:${a.status === 'Pending' ? 'orange' : (a.status === 'Approved' ? 'green' : 'red')}">${a.status}</span></td>
+                        <td style="font-size:0.8rem;">${actions}</td>
+                    </tr>`;
+            };
+
+            let notificationHTML = '';
+            if (incomingRequestsRaw.some(r => r.status === 'Pending')) {
+                notificationHTML = `<div class="adj-notification" style="background:#fff7ed; color:#9a3412; padding:10px; border-radius:6px; margin-bottom:10px; border-left:4px solid #fdba74; font-size:0.85rem; display:flex; align-items:center; gap:10px;"><i class="fas fa-exclamation-triangle"></i><div><strong>Pending Requests!</strong><br>You have requests waiting.</div></div>`;
+            }
+
+            // Excel-like table structure
+            contentArea.innerHTML = `
+                <h2 class="header-title" style="margin-bottom:10px;">Schedule Adjustments</h2>
+                ${notificationHTML}
+                <div style="display:grid; grid-template-columns: 300px 1fr; gap:1rem; height: calc(100% - 30px);">
+                    <div style="display:flex; flex-direction:column; gap:1rem; height:100%; overflow:hidden;">
+                        <div class="card" style="height:100%; margin:0; display:flex; flex-direction:column; overflow:hidden;">
+                            <h3 style="margin-bottom:10px; font-size:0.9rem;">Request Adjustment</h3>
+                            <form onsubmit="requestAdjustment(event)" style="flex:1; display:flex; flex-direction:column; justify-content:space-between; overflow-y:auto;">
+                                <div>
+                                    <div class="form-group"><label>Date</label><input type="date" id="adj-date" required min="${new Date().toISOString().split('T')[0]}" onchange="checkAdjInputs(); checkSunday(this)" class="msg-input"></div>
+                                    <small id="sunday-error" style="color:var(--danger); display:none; font-size:0.75rem;">Sunday is not allowed.</small>
+                                    <div class="form-group"><label>Time Slot</label><select id="adj-time" required onchange="checkAdjInputs()" class="msg-input"><option value="">Select Time</option>${timetableSlots.filter(t => t !== "Short Break").map(t => `<option value="${t}">${t}</option>`).join('')}</select></div>
+                                    
+                                    <div class="form-group">
+                                        <label>Select Free Faculty</label>
+                                        <div id="free-teachers-list" class="free-teachers-grid">
+                                            <div style="grid-column: 1/-1; text-align:center; color:var(--text-grey); padding:10px; font-size:0.8rem;">Select Date & Time to see free teachers</div>
+                                        </div>
+                                        <input type="hidden" id="adj-to" required>
+                                    </div>
+
+                                    <div class="form-group"><label>Reason</label><input type="text" id="adj-reason" required placeholder="Reason" class="msg-input"></div>
+                                </div>
+                                <button type="submit" class="btn btn-primary" style="margin-top:10px;">Send Request</button>
+                            </form>
+                        </div>
+                    </div>
+                    <div style="display:grid; grid-template-rows: 1fr 1fr; gap:1rem; height:100%; overflow:hidden;">
+                        <div class="card" style="height:100%; margin:0; display:flex; flex-direction:column; overflow:hidden;">
+                            <h3 style="margin-bottom:10px; font-size:0.9rem;">My Requests</h3>
+                            <div class="scrollable-list-container" style="flex:1; overflow-y:auto; border:none; border-radius:0;">
+                                <table class="excel-table request-table-scroll" style="width:100%; border-collapse:collapse; font-size:0.8rem;">
+                                    <thead><tr><th>Date</th><th>Time</th><th>Assigned To</th><th>Reason</th><th>Status</th></tr></thead>
+                                    <tbody>${myRequestsRaw.length ? myRequestsRaw.slice(0, 4).map(renderMyRequestRow).join('') : '<tr><td colspan="5" style="padding:20px; text-align:center; color:var(--text-grey);">No requests.</td></tr>'}</tbody>
+                                </table>
+                            </div>
+                        </div>
+                        
+                        <div class="card" style="height:100%; margin:0; display:flex; flex-direction:column; overflow:hidden;">
+                            <h3 style="margin-bottom:10px; font-size:0.9rem;">Assigned to Me</h3>
+                            <div class="scrollable-list-container" style="flex:1; overflow-y:auto; border:none; border-radius:0;">
+                                <table class="excel-table request-table-scroll" style="width:100%; border-collapse:collapse; font-size:0.8rem;">
+                                    <thead><tr><th>Date</th><th>Time</th><th>Req By</th><th>Reason</th><th>Status</th><th>Action</th></tr></thead>
+                                    <tbody>${incomingRequestsRaw.length ? incomingRequestsRaw.slice(0, 4).map(renderIncomingRow).join('') : '<tr><td colspan="6" style="padding:20px; text-align:center; color:var(--text-grey);">No pending.</td></tr>'}</tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            setTimeout(() => {
+                document.querySelectorAll('.ft-name').forEach(el => {
+                    let size = 12; 
+                    el.style.fontSize = size + 'px';
+                    while (el.scrollWidth > el.clientWidth && size > 8) {
+                        size--;
+                        el.style.fontSize = size + 'px';
+                    }
+                });
+            }, 100);
+        }
+
+        function checkSunday(input) {
+            if (!input.value) return;
+            const date = new Date(input.value);
+            const day = date.getDay();
+            const errorMsg = document.getElementById('sunday-error');
+            if (day === 0) {
+                errorMsg.style.display = 'block';
+                input.value = '';
+                showToast("Sunday is not allowed for adjustments.");
+            } else {
+                errorMsg.style.display = 'none';
+            }
+        }
+
+        function checkAdjInputs() {
+            const date = document.getElementById('adj-date').value;
+            const time = document.getElementById('adj-time').value;
+            const container = document.getElementById('free-teachers-list');
+            const hiddenInput = document.getElementById('adj-to');
+
+            if (date && time) {
+                const dayName = getDayName(date);
+
+                const busyIds = timetableData
+                    .filter(t => t.day === dayName && t.time === time)
+                    .map(t => t.userId);
+
+                let freeTeachers = state.users.filter(u => {
+                    return u.role === 'employee' && u.id !== state.currentUser.id && !busyIds.includes(u.id);
+                });
+
+                freeTeachers.sort((a, b) => {
+                    const loadA = timetableData.filter(t => t.userId === a.id).length;
+                    const loadB = timetableData.filter(t => t.userId === b.id).length;
+                    return loadA - loadB;
+                });
+
+                if (freeTeachers.length === 0) {
+                    container.innerHTML = `<div style="grid-column: 1/-1; text-align:center; color:var(--danger); padding:10px; font-size:0.8rem;">No free teachers available.</div>`;
+                    hiddenInput.value = '';
+                } else {
+                    container.innerHTML = freeTeachers.map(t => {
+                        const workload = timetableData.filter(tt => tt.userId === t.id).length;
+                        return `
+                        <div class="free-teacher-card" onclick="selectFreeTeacher(${t.id}, this)">
+                            <img src="${t.photo}" class="ft-photo">
+                            <div class="ft-info">
+                                <div class="ft-name">${t.name}</div>
+                                <div class="ft-details">
+                                    <span>ID: ${t.uid}</span>
+                                    <span class="ft-load"><i class="fas fa-briefcase"></i> Load: ${workload}</span>
+                                </div>
+                            </div>
+                        </div>`;
+                    }).join('');
+                }
+
+            } else {
+                container.innerHTML = `<div style="grid-column: 1/-1; text-align:center; color:var(--text-grey); padding:10px; font-size:0.8rem;">Select Date & Time to see free teachers</div>`;
+                hiddenInput.value = '';
+            }
+        }
+
+        function selectFreeTeacher(id, el) {
+            document.querySelectorAll('.free-teacher-card').forEach(c => c.classList.remove('selected'));
+            el.classList.add('selected');
+            document.getElementById('adj-to').value = id;
+        }
+
+        function getDayName(dateStr) {
+            const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+            return days[new Date(dateStr).getDay()];
+        }
+
+        function requestAdjustment(e) {
+            e.preventDefault();
+            const date = document.getElementById('adj-date').value;
+            const time = document.getElementById('adj-time').value;
+            const toId = parseInt(document.getElementById('adj-to').value);
+            const reason = document.getElementById('adj-reason').value;
+
+            if (!toId) return showToast("Please select a faculty from the list.");
+
+            state.adjustments.push({ id: Date.now(), fromId: state.currentUser.id, toId: toId, date: date, timeSlot: time, reason: reason, status: 'Pending', timestamp: new Date().toISOString() });
+            state.messages.push({ id: Date.now(), fromId: 0, toId: toId, subject: "New Adjustment", content: `${state.currentUser.name} req: ${date} ${time}`, date: new Date().toLocaleString(), read: false, timestamp: new Date().toISOString() });
+            saveState();
+            updateNotificationCount();
+            showToast("Request Sent!");
+            renderAdjustments();
+        }
+
+        function processAdjustment(id, status) {
+            const adj = state.adjustments.find(a => a.id === id);
+            if (adj) { adj.status = status; saveState(); updateNotificationCount(); showToast(`Request ${status}`); renderAdjustments(); }
+        }
+
+        /* --- CLASS UPDATE --- */
+        function renderClassUpdate() {
+            const user = state.currentUser;
+
+            if (user.role === 'student') {
+                contentArea.innerHTML = `
+                    <h2 class="header-title" style="margin-bottom:10px;">Class Updates</h2>
+                    <div class="card">
+                        ${state.studentUpdates.length ? state.studentUpdates.map(u => `
+                            <div style="padding:10px 0; border-bottom:1px solid var(--border-color); font-size:0.85rem;">
+                                <div style="font-weight:bold; color:var(--primary);">${u.title} <span style="float:right; font-size:0.7rem; color:var(--text-grey);">${u.date}</span></div>
+                                <div style="color:var(--text-grey); margin-top:3px;">${u.content}</div>
+                            </div>
+                        `).join('') : '<p style="padding:20px; text-align:center; color:var(--text-grey);">No updates yet.</p>'}
+                    </div>
+                `;
+                return;
+            }
+
+            const myUpdates = state.studentUpdates.filter(u => u.teacherId === user.id);
+            const classOptions = availableClasses.map(c => `<option value="${c}">${c}</option>`).join('');
+            editingUpdateId = null;
+
+            // Get current teacher's student group
+            const myGroupIds = teacherStudentGroups[user.id] || [];
+            const myGroupStudents = state.users.filter(u => myGroupIds.includes(u.id));
+
+            const myClasses = timetableData.filter(t => t.userId === user.id).map(t => `${t.subject} (${t.block})`);
+            const uniqueClasses = [...new Set(myClasses)].join(', ');
+
+            contentArea.innerHTML = `
+                <h2 class="header-title" style="margin-bottom:10px;">Class Update</h2>
+                
+                <div class="class-update-layout">
+                    
+                    <div class="manage-classes-col">
+                        <h3 style="margin-bottom:8px; color:var(--gold); font-size:0.9rem;"><i class="fas fa-cogs"></i> Manage Classes</h3>
+                        <p style="font-size:0.75rem; color:var(--text-grey); margin-bottom:8px;">Add/remove classes for dropdown.</p>
+                        
+                        <div style="display:flex; gap:8px; margin-bottom:8px; align-items:center;">
+                            <input type="text" id="new-class-name" placeholder="e.g. CSE-C" class="msg-input" style="flex:1; padding:6px; font-size:0.85rem;">
+                            <button type="button" class="btn btn-primary btn-sm" onclick="addNewClass()">Add</button>
+                        </div>
+
+                        <div class="class-item-list">
+                            ${availableClasses.length ? availableClasses.map(c => `
+                                <div class="class-item-row">
+                                    <span>${c}</span>
+                                    <span class="btn-delete-small" onclick="deleteClassOption('${c}')"><i class="fas fa-trash"></i></span>
+                                </div>
+                            `).join('') : '<div style="padding:10px; color:var(--text-grey); text-align:center; font-size:0.75rem;">No classes added yet.</div>'}
+                        </div>
+                    </div>
+
+                    <!-- NEW COLUMN: Student Group Management -->
+                    <div class="manage-students-col">
+                        <h3 style="margin-bottom:8px; color:var(--primary); font-size:0.9rem;"><i class="fas fa-users"></i> My Student Group</h3>
+                        <p style="font-size:0.75rem; color:var(--text-grey); margin-bottom:8px;">Students added here will get your updates.</p>
+                        
+                        <div style="display:flex; gap:8px; margin-bottom:8px; align-items:center;">
+                            <select id="add-student-select-update" class="msg-input" style="flex:1; padding:6px; font-size:0.85rem;">
+                                <option value="">Select Student</option>
+                                ${state.users.filter(u => u.role === 'student' && !myGroupIds.includes(u.id)).map(s => `<option value="${s.id}">${s.name} (${s.uid})</option>`).join('')}
+                            </select>
+                            <button type="button" class="btn btn-primary btn-sm" onclick="addStudentToGroupFromUpdate()">Add</button>
+                        </div>
+
+                        <div class="class-item-list">
+                            ${myGroupStudents.length ? myGroupStudents.map(s => `
+                                <div class="class-item-row">
+                                    <span>${s.name} (${s.uid})</span>
+                                    <span class="btn-delete-small" onclick="removeStudentFromGroup(${s.id})"><i class="fas fa-trash"></i></span>
+                                </div>
+                            `).join('') : '<div style="padding:10px; color:var(--text-grey); text-align:center; font-size:0.75rem;">No students in group.</div>'}
+                        </div>
+                    </div>
+
+                    <div class="post-update-col">
+                        <div class="msg-pane msg-compose" style="height: auto; flex: 0 0 auto; overflow: visible;">
+                            <div class="msg-compose-card">
+                                <h3 style="margin-bottom:8px; color:var(--primary); border-bottom:1px solid var(--border-color); padding-bottom:4px; font-size:0.9rem;"><i class="fas fa-chalkboard-teacher"></i> Post Daily Update</h3>
+                                
+                                ${user.role === 'hod' ? `<div style="background:#e0f2fe; padding:8px; border-radius:4px; margin-bottom:8px; font-size:0.75rem; color:#0369a1; border:1px solid #bae6fd;"><strong><i class="fas fa-info-circle"></i> Current Classes:</strong> ${uniqueClasses || 'None'}</div>` : ''}
+
+                                <form id="class-update-form" onsubmit="postClassUpdate(event)" style="margin-top:8px;">
+                                    <div class="msg-form-group"><label style="font-size:0.75rem;">Target Class</label><select id="cu-class" class="msg-input" style="font-size:0.85rem;">${classOptions}</select></div>
+                                    <div class="msg-form-group"><label style="font-size:0.75rem;">Update Title</label><input type="text" id="cu-title" class="msg-input" placeholder="e.g. Assignment 3" required style="font-size:0.85rem;"></div>
+                                    <div class="msg-form-group"><label style="font-size:0.75rem;">Type</label><select id="cu-type" class="msg-input" style="font-size:0.85rem;"><option value="Assignment">Assignment</option><option value="Surprise">Surprise Test</option><option value="Update">Class Update</option></select></div>
+                                    <div class="msg-form-group" style="flex:1; display:flex; flex-direction:column;"><label style="font-size:0.75rem;">Content</label><textarea id="cu-content" class="msg-textarea" placeholder="Paste instructions here..." required style="font-size:0.85rem;"></textarea></div>
+                                    <button type="submit" id="cu-submit-btn" class="btn btn-primary" style="margin-top:8px;"><i class="fas fa-paper-plane"></i> Post</button>
+                                    ${editingUpdateId ? `<button type="button" class="btn btn-danger" onclick="cancelEditClass()" style="margin-top:8px;">Cancel</button>` : ''}
+                                </form>
+                            </div>
+                        </div>
+                        <div class="msg-pane" style="flex: 1; min-height: 0; overflow:hidden;">
+                            <div class="card" style="height:100%; display:flex; flex-direction: column; margin:0; overflow:hidden; border:1px solid var(--border-color);">
+                                <div class="card-header" style="padding:6px 0;"><h3 style="margin:0; color:var(--primary); font-size:0.9rem;"><i class="fas fa-history"></i> History</h3></div>
+                                <div style="overflow-y:auto; flex:1; padding-right:5px;">
+                                    ${myUpdates.length === 0 ? '<div style="text-align:center; color:var(--text-grey); margin-top:30px; font-size:0.85rem;">No updates.</div>' : myUpdates.map(u => `
+                                        <div class="update-card">
+                                            <div class="update-actions">
+                                                <button class="update-action-btn edit" onclick="editClassUpdate(${u.id})" title="Edit"><i class="fas fa-edit"></i></button>
+                                                <button class="update-action-btn delete" onclick="deleteClassUpdate(${u.id})" title="Delete"><i class="fas fa-trash"></i></button>
+                                            </div>
+                                            <div style="display:flex; justify-content:space-between; margin-right: 50px;">
+                                                <strong style="font-size:0.85rem;">${u.title}</strong><span class="status-badge badge-${u.type === 'Assignment' ? 'pending' : 'approved'}" style="font-size:0.65rem; padding:2px 4px; border-radius:3px;">${u.type}</span>
+                                            </div>
+                                            <div style="font-size:0.7rem; color:var(--primary); font-weight:bold; margin:2px 0;">To: ${u.targetClass}</div>
+                                            <div style="font-size:0.8rem; color:var(--text-grey); margin-top:4px; white-space: pre-wrap;">${u.content}</div>
+                                            <div style="font-size:0.7rem; color:var(--text-grey); margin-top:6px;">Posted: ${u.date}</div>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+        
+        // Helper for Class Update - Student Group Management
+        function addStudentToGroupFromUpdate() {
+            const select = document.getElementById('add-student-select-update');
+            const id = parseInt(select.value);
+            if (!id) return;
+            
+            if (!teacherStudentGroups[state.currentUser.id]) {
+                teacherStudentGroups[state.currentUser.id] = [];
+            }
+            
+            if (!teacherStudentGroups[state.currentUser.id].includes(id)) {
+                teacherStudentGroups[state.currentUser.id].push(id);
+                saveState();
+                renderClassUpdate();
+                showToast("Student Added to Group");
+            } else {
+                showToast("Student already in group");
+            }
+        }
+        
+        function removeStudentFromGroup(studentId) {
+            if (confirm("Remove student from group?")) {
+                teacherStudentGroups[state.currentUser.id] = teacherStudentGroups[state.currentUser.id].filter(id => id !== studentId);
+                saveState();
+                renderClassUpdate();
+            }
+        }
+
+        function deleteClassOption(className) {
+            if (confirm(`Delete "${className}"?`)) {
+                availableClasses = availableClasses.filter(c => c !== className);
+                saveState();
+                renderClassUpdate();
+            }
+        }
+
+        function addNewClass() {
+            const name = document.getElementById('new-class-name').value.trim();
+            if (name) {
+                if (!availableClasses.includes(name)) {
+                    availableClasses.push(name);
+                    saveState();
+                    renderClassUpdate();
+                    showToast("Class Added!");
+                } else {
+                    showToast("Class exists.");
+                }
+            }
+        }
+
+        function postClassUpdate(e) {
+            e.preventDefault();
+            const targetClass = document.getElementById('cu-class').value;
+            const title = document.getElementById('cu-title').value;
+            const type = document.getElementById('cu-type').value;
+            const content = document.getElementById('cu-content').value;
+
+            if (editingUpdateId) {
+                const idx = state.studentUpdates.findIndex(u => u.id === editingUpdateId);
+                if (idx !== -1) {
+                    state.studentUpdates[idx] = { ...state.studentUpdates[idx], targetClass, title, type, content, date: new Date().toLocaleString() + ' (Edited)' };
+                    showToast("Update Modified!");
+                }
+                editingUpdateId = null;
+            } else {
+                const newUpdate = { id: Date.now(), teacherId: state.currentUser.id, teacherName: state.currentUser.name, targetClass, title, type, content, date: new Date().toLocaleString(), timestamp: new Date().toISOString() };
+                state.studentUpdates.push(newUpdate);
+                showToast("Posted!");
+                document.querySelector('form').reset();
+            }
+
+            saveState();
+            renderClassUpdate();
+        }
+
+        function editClassUpdate(id) {
+            const u = state.studentUpdates.find(x => x.id === id);
+            if (!u) return;
+            editingUpdateId = id;
+            document.getElementById('cu-class').value = u.targetClass;
+            document.getElementById('cu-title').value = u.title;
+            document.getElementById('cu-type').value = u.type;
+            document.getElementById('cu-content').value = u.content;
+            const btn = document.getElementById('cu-submit-btn');
+            btn.innerHTML = '<i class="fas fa-save"></i> Save Changes';
+            btn.classList.replace('btn-primary', 'btn-warning');
+            if (!document.getElementById('cancel-edit-btn')) {
+                const form = document.getElementById('class-update-form');
+                const cancelBtn = document.createElement('button');
+                cancelBtn.type = 'button'; cancelBtn.id = 'cancel-edit-btn'; cancelBtn.className = 'btn btn-danger';
+                cancelBtn.style.marginTop = '8px'; cancelBtn.innerText = 'Cancel Edit';
+                cancelBtn.onclick = cancelEditClass; form.appendChild(cancelBtn);
+            }
+            document.querySelector('.post-update-col').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function cancelEditClass() {
+            editingUpdateId = null;
+            renderClassUpdate();
+        }
+
+        function deleteClassUpdate(id) {
+            if (confirm("Delete update?")) {
+                state.studentUpdates = state.studentUpdates.filter(u => u.id !== id);
+                saveState();
+                showToast("Deleted.");
+                renderClassUpdate();
+            }
+        }
+
+        /* --- SYLLABUS --- */
+        function renderSyllabus() {
+            const user = state.currentUser;
+            const mySyllabus = syllabusData.filter(s => s.createdBy === user.id);
+
+            contentArea.innerHTML = `
+                <h2 class="header-title" style="margin-bottom:10px;">Syllabus Management</h2>
+                <div class="card" style="height:100%; overflow:hidden; display:flex; flex-direction:column;">
+                    <div class="card-header" style="flex:0 0 auto;">
+                        <h3 style="margin:0; font-size:0.9rem;"><i class="fas fa-book"></i> Manage</h3>
+                        <button class="btn btn-primary btn-sm" onclick="openSyllabusModal()" style="width:auto;"><i class="fas fa-plus"></i> Add</button>
+                    </div>
+                    <div style="flex:1; overflow-y:auto; padding-right:5px;">
+                        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap:10px;">
+                            ${mySyllabus.length ? mySyllabus.map(s => `
+                                <div class="syllabus-card" style="background:var(--card-bg); padding:10px; border-radius:var(--radius); border:1px solid var(--border-color); position:relative;">
+                                    <span class="syllabus-tag" style="position:absolute; top:8px; right:8px; background:var(--primary); color:white; padding:2px 6px; border-radius:4px; font-size:0.6rem;">${s.subject}</span>
+                                    <h4 style="margin: 10px 0 4px; color:var(--primary); font-size:0.85rem;">${s.title}</h4>
+                                    <p style="font-size:0.7rem; color:var(--text-grey); margin-bottom:6px;">Class: ${s.targetClass}</p>
+                                    <button class="btn btn-danger btn-sm" onclick="deleteSyllabus(${s.id})" style="width:auto; padding:4px 8px; font-size:0.7rem;">Delete</button>
+                                </div>
+                            `).join('') : '<p style="grid-column: 1/-1; text-align:center; color:var(--text-grey); padding:20px;">No syllabus uploaded.</p>'}
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function openSyllabusModal() {
+            const title = prompt("Syllabus Title:");
+            const subject = prompt("Subject Name:");
+            const tClass = prompt("Class/Section:");
+            if (title && subject && tClass) {
+                syllabusData.push({ id: Date.now(), title, subject, targetClass: tClass, createdBy: state.currentUser.id, date: new Date().toLocaleDateString() });
+                saveState();
+                renderSyllabus();
+            }
+        }
+
+        function deleteSyllabus(id) {
+            if (confirm("Delete?")) {
+                syllabusData = syllabusData.filter(s => s.id !== id);
+                saveState();
+                renderSyllabus();
+            }
+        }
+
+        /* --- MESSAGES --- */
+        function renderMessages() {
+            const user = state.currentUser;
+            if (user.role === 'student') { renderStudentGroupChat(); return; }
+
+            let msgs = [];
+            if (currentMsgTab === 'inbox') {
+                msgs = state.messages.filter(m => m.toId === user.id);
+                msgs.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+            } else {
+                msgs = state.messages.filter(m => m.fromId === user.id);
+                msgs.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+            }
+
+            const recipientOptions = state.users.filter(u => u.id !== user.id).map(u => `<option value="${u.id}">${u.name} (${u.dept})</option>`).join('');
+
+            contentArea.innerHTML = `
+                <h2 class="header-title" style="margin-bottom:10px;">Messages</h2>
+                <div class="modern-msg-container">
+                    <div class="modern-compose-pane">
+                        <h3 style="margin-bottom:10px; color:var(--primary); font-size:0.9rem;"><i class="fas fa-pen-fancy"></i> Compose</h3>
+                        <form onsubmit="sendNewMessage(event)">
+                            <div class="modern-input-group">
+                                <label class="modern-input-label">To</label>
+                                <select id="msg-to" class="modern-input-field" required>
+                                    <option value="">Select Recipient</option>${recipientOptions}
+                                </select>
+                            </div>
+                            <div class="modern-input-group">
+                                <label class="modern-input-label">Subject</label>
+                                <input type="text" id="msg-subject" class="modern-input-field" placeholder="Enter subject" required>
+                            </div>
+                            <div class="modern-input-group" style="flex:1; display:flex; flex-direction:column;">
+                                <label class="modern-input-label">Message</label>
+                                <textarea id="msg-content" class="modern-input-field modern-textarea" placeholder="Type here..." required style="min-height:80px;"></textarea>
+                            </div>
+                            <button type="submit" class="btn btn-primary" style="margin-top:10px; padding:8px;"><i class="fas fa-paper-plane"></i> Send Message</button>
+                        </form>
+                    </div>
+                    
+                    <div class="modern-list-pane">
+                        <div class="modern-msg-header">
+                            <h3 style="margin:0; color:inherit; font-size:0.9rem;"><i class="fas fa-${currentMsgTab === 'inbox' ? 'inbox' : 'paper-plane'}"></i> ${currentMsgTab === 'inbox' ? 'Inbox' : 'Sent'}</h3>
+                            <div style="display:flex; gap:8px;">
+                                <button class="msg-toggle-btn ${currentMsgTab === 'inbox' ? 'active' : ''}" onclick="switchMsgTab('inbox')">Inbox</button>
+                                <button class="msg-toggle-btn ${currentMsgTab === 'sent' ? 'active' : ''}" onclick="switchMsgTab('sent')">Sent</button>
+                            </div>
+                            ${currentMsgTab === 'sent' ? `
+                            <div style="margin-left:auto; display:flex; gap:4px;">
+                                <button class="btn btn-danger btn-sm" style="padding:2px 6px; font-size:0.65rem;" onclick="deleteSentMessages(24)">24h</button>
+                                <button class="btn btn-danger btn-sm" style="padding:2px 6px; font-size:0.65rem;" onclick="deleteSentMessages(168)">7d</button>
+                                <button class="btn btn-danger btn-sm" style="padding:2px 6px; font-size:0.65rem;" onclick="deleteSentMessages(720)">1mo</button>
+                            </div>` : ''}
+                        </div>
+                        <div class="modern-msg-list">
+                            ${msgs.length === 0 ? '<div style="text-align:center; padding:20px; color:var(--text-grey); font-size:0.85rem;">No messages.</div>' : msgs.map(m => renderModernMessageItem(m, user.id)).join('')}
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderModernMessageItem(m, myId) {
+            const isMe = m.fromId === myId;
+            const otherId = isMe ? m.toId : m.fromId;
+            const otherUser = state.users.find(u => u.id === otherId) || { name: 'System', photo: '' };
+            const avatarHtml = `<img src="${otherUser.photo || getAvatar('system')}" class="modern-avatar" alt="Avatar">`;
+            const senderLabel = isMe ? `To: ${otherUser.name}` : otherUser.name;
+            return `
+                <div class="modern-msg-item">
+                    ${avatarHtml}
+                    <div class="modern-content">
+                        <div class="modern-top-row">
+                            <span class="modern-sender">${senderLabel}</span>
+                            <span class="modern-time">${m.date}</span>
+                        </div>
+                        <div class="modern-subject">${m.subject}</div>
+                        <div class="modern-snippet">${m.content}</div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function deleteSentMessages(hours) {
+            const cutoff = Date.now() - (hours * 60 * 60 * 1000);
+            const countBefore = state.messages.length;
+
+            state.messages = state.messages.filter(m => {
+                if (m.fromId === state.currentUser.id) {
+                    return m.timestamp > cutoff;
+                }
+                return true;
+            });
+
+            const deleted = countBefore - state.messages.length;
+            saveState();
+            showToast(`Deleted ${deleted} messages older than ${hours}h.`);
+            renderMessages();
+        }
+
+        /* --- STUDENT GROUP CHAT --- */
+        function renderStudentGroupChat() {
+            const user = state.currentUser;
+            // Student logic: Find teachers who have this student in their group
+            const myTeacherGroups = [];
+            for (const [teacherId, studentIds] of Object.entries(teacherStudentGroups)) {
+                if (studentIds.includes(user.id)) {
+                    myTeacherGroups.push(parseInt(teacherId));
+                }
+            }
+
+            // Filter messages relevant to student (Global chat or specific teacher chats)
+            // For simplicity, we show the "Global" chat for students as per initial design, 
+            // but in a real app this would be tabbed. 
+            // Let's stick to the global chat for this view but add the teacher section concept in mind.
+
+            contentArea.innerHTML = `
+                <h2 class="header-title" style="margin-bottom:10px;">Group Chat</h2>
+                
+                ${myTeacherGroups.length > 0 ? `
+                <div style="margin-bottom:15px; background:var(--bg-body); padding:10px; border-radius:8px; border:1px solid var(--border-color);">
+                    <h4 style="margin:0 0 8px 0; font-size:0.85rem; color:var(--primary);">My Teacher Groups</h4>
+                    ${myTeacherGroups.map(tid => {
+                        const t = state.users.find(u => u.id === tid);
+                        return `<div style="display:flex; align-items:center; gap:10px; margin-bottom:5px; font-size:0.8rem;">
+                            <img src="${t.photo}" style="width:24px; height:24px; border-radius:50%;">
+                            <span>${t.name}</span>
+                        </div>`;
+                    }).join('')}
+                </div>` : ''}
+
+                <div class="proper-chat-container">
+                    <div class="chat-header">
+                        <div><strong>Class Group</strong><br><small style="opacity:0.8; font-size:0.7rem;">${state.users.filter(u => u.role === 'student').length + 5} Members</small></div>
+                        <div class="chat-header-icons">
+                            <button class="chat-icon-btn" title="Video Call" onclick="startGroupCall()"><i class="fas fa-video"></i></button>
+                        </div>
+                    </div>
+                    <div class="chat-area" id="chat-scroller">
+                        ${state.groupChat.map(m => {
+                const isMe = m.senderId === user.id;
+                return `<div class="chat-bubble ${isMe ? 'right' : 'left'}"><strong style="font-size:0.75rem;">${isMe ? 'You' : m.senderName}</strong><br>${m.text}<div class="chat-time">${m.time}</div></div>`;
+            }).join('')}
+                    </div>
+                    <div class="chat-input-area">
+                        <input type="text" id="chat-input-text" class="chat-input" placeholder="Type a message...">
+                        <button class="chat-send-btn" onclick="sendGroupMessage()"><i class="fas fa-paper-plane"></i></button>
+                    </div>
+                </div>
+            `;
+            setTimeout(() => { const s = document.getElementById('chat-scroller'); if (s) s.scrollTop = s.scrollHeight; }, 100);
+        }
+
+        function startGroupCall() {
+            showToast("Starting Video Call...");
+            setTimeout(() => showToast("Connecting to Group Video Server..."), 2000);
+        }
+
+        function openAddStudentModal() {
+            const select = document.getElementById('add-student-select');
+            select.innerHTML = '';
+            state.users.filter(u => u.role === 'student').forEach(s => {
+                select.innerHTML += `<option value="${s.id}">${s.name} (${s.uid})</option>`;
+            });
+            document.getElementById('add-student-modal').style.display = 'flex';
+        }
+
+        function confirmAddStudent() {
+            const id = parseInt(document.getElementById('add-student-select').value);
+            const student = state.users.find(u => u.id === id);
+            if (student) {
+                showToast(`${student.name} has been added to the group.`);
+                state.groupChat.push({
+                    id: Date.now(),
+                    senderId: 0,
+                    senderName: 'System',
+                    text: `${student.name} joined the group.`,
+                    time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+                });
+                saveState();
+                renderStudentGroupChat();
+            }
+            closeModal('add-student-modal');
+        }
+
+        function sendGroupMessage() {
+            const input = document.getElementById('chat-input-text');
+            const text = input.value.trim();
+            if (!text) return;
+            const newMsg = { id: Date.now(), senderId: state.currentUser.id, senderName: state.currentUser.name, text: text, time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) };
+            state.groupChat.push(newMsg);
+            saveState();
+            input.value = '';
+            renderStudentGroupChat();
+        }
+
+        function switchMsgTab(tab) {
+            currentMsgTab = tab;
+            renderMessages();
+        }
+
+        function sendNewMessage(e) {
+            e.preventDefault();
+            const toId = parseInt(document.getElementById('msg-to').value);
+            const subject = document.getElementById('msg-subject').value;
+            const content = document.getElementById('msg-content').value;
+
+            const newMsg = {
+                id: Date.now(),
+                fromId: state.currentUser.id,
+                toId: toId,
+                subject: subject,
+                content: content,
+                date: new Date().toLocaleString(),
+                read: false,
+                timestamp: new Date().toISOString()
+            };
+
+            state.messages.push(newMsg);
+            saveState();
+            updateNotificationCount();
+
+            showToast("Message Sent!");
+            document.getElementById('msg-to').parentElement.parentElement.reset();
+
+            currentMsgTab = 'sent';
+            renderMessages();
+        }
+
+        /* --- STUDENT UPDATES --- */
+        function renderStudentUpdates() {
+            state.studentUpdates.forEach(u => { if (!u.read) u.read = true; });
+            saveState();
+            updateNotificationCount();
+
+            if (state.studentUpdates.length === 0) {
+                contentArea.innerHTML = `<h2 class="header-title" style="margin-bottom:10px;">Daily Updates</h2><div style="text-align:center; padding:50px; color:var(--text-grey);">No updates available yet.</div>`;
+                return;
+            }
+
+            contentArea.innerHTML = `
+                <h2 class="header-title" style="margin-bottom:10px;">Daily Updates</h2>
+                <div class="updates-timeline" style="max-width:800px; margin:0 auto; overflow-y:auto; height:calc(100% - 40px); padding-bottom:20px;">
+                    ${state.studentUpdates.map(u => {
+                let iconClass = 'fa-bullhorn';
+                let color = 'var(--primary)';
+                if (u.type === 'Assignment') { iconClass = 'fa-book'; color = 'var(--warning)'; }
+                if (u.type === 'Surprise') { iconClass = 'fa-clipboard-check'; color = 'var(--success)'; }
+
+                return `
+            <div style="display:flex; gap:12px; margin-bottom:16px; border-bottom:1px solid var(--border-color); padding-bottom:12px;">
+                <div style="min-width:32px; height:32px; border-radius:50%; background:${color}20; color:${color}; display:flex; align-items:center; justify-content:center; border:1px solid ${color}; flex-shrink:0;">
+                    <i class="fas ${iconClass}" style="font-size:0.8rem;"></i>
+                </div>
+                <div style="flex:1;">
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <h3 style="margin:0 0 4px 0; color:var(--dark); font-size:0.9rem;">${u.title}</h3>
+                        <span style="font-size:0.65rem; background:var(--bg-body); padding:2px 6px; border-radius:8px; border:1px solid var(--border-color);">${u.type}</span>
+                    </div>
+                    <p style="font-size:0.75rem; color:var(--text-grey); margin-bottom:4px;"><strong>Class:</strong> ${u.targetClass} <span style="margin:0 4px;">|</span> <strong>Date:</strong> ${u.date}</p>
+                    <div style="background:var(--bg-body); padding:8px; border-radius:4px; border-left:3px solid #ccc; font-size:0.85rem; white-space: pre-wrap;">${u.content}</div>
+                    <div style="margin-top:6px; font-size:0.7rem; color:var(--text-grey);">Posted by: ${u.teacherName}</div>
+                </div>
+            </div>
+            `;
+            }).join('')}
+            </div>
+        `;
+        }
+
+        /* --- TIMETABLE --- */
+        function renderTimetable() {
+            const days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
+            const user = state.currentUser;
+
+            let viewingUserId = user.role === 'employee' ? user.id : viewTimetableForUserId;
+            let viewingUser = state.users.find(u => u.id === viewingUserId);
+
+            let rows = "";
+            if (viewingUser) {
+                days.forEach(day => {
+                    rows += `<tr><td class="tt-day-col">${day}</td>`;
+                    timetableSlots.forEach(slot => {
+                        const record = timetableData.find(t => t.day === day && t.time === slot && t.userId === viewingUserId);
+                        if (record) {
+                            rows += `<td class="tt-cell" onclick="loadSlotToEdit('${day}', '${slot}')"><div class="tt-content"><span class="tt-subj">${record.subject}</span><span class="tt-code">${record.courseCode || ''}</span><span class="tt-block">${record.block || ''}</span><span class="tt-room">${record.room}</span></div><div class="tt-plus-btn"><i class="fas fa-plus"></i></div></td>`;
+                        } else if (slot === "Short Break") {
+                            rows += `<td class="tt-cell tt-break">Short Break</td>`;
+                        } else {
+                            rows += `<td class="tt-cell" onclick="loadSlotToEdit('${day}', '${slot}')" style="background:var(--bg-body);"><button class="tt-plus-btn" type="button"><i class="fas fa-plus"></i></button></td>`;
+                        }
+                    });
+                    rows += `</tr>`;
+                });
+            } else {
+                rows = `<tr><td colspan="${timetableSlots.length + 1}" style="text-align:center; color:var(--text-grey); padding:20px; font-size:0.85rem;">Please select an employee to view timetable.</td></tr>`;
+            }
+
+            let headerContent = `<h2 class="header-title" style="margin-bottom:10px;">Timetable Management</h2>`;
+            let actionBar = '';
+            let fabAdd = '';
+
+            if (user.role === 'hod' || user.role === 'oa' || user.role === 'employee') {
+                let searchHTML = '';
+                if (user.role === 'employee') {
+                    searchHTML = `
+                    <div style="background:#e0f2fe; padding:8px; border-radius:6px; margin-bottom:10px; border:1px solid #bae6fd; display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
+                        <div style="font-weight:bold; color:#0369a1; font-size:0.85rem;"><i class="fas fa-search"></i> Search Colleague:</div>
+                        <div style="flex:1; min-width:200px;">
+                            <input type="text" id="search-emp-id" class="msg-input" placeholder="Name or Code (e.g. E14746)" style="padding:6px; font-size:0.85rem;">
+                        </div>
+                        <button class="btn btn-primary btn-sm" onclick="searchEmployeeTimetable()" style="margin:0; width:auto;">Search</button>
+                        ${viewingUserId && viewingUserId !== user.id ? `<button class="btn btn-danger btn-sm" onclick="clearTimetableSearch()" style="margin:0; width:auto;">My TT</button>` : ''}
+                    </div>
+                    `;
+                } else {
+                    searchHTML = `
+                    <div style="background:#e0f2fe; padding:10px; border-radius:8px; margin-bottom:15px; border:1px solid #bae6fd; display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+                        <div style="font-weight:bold; color:#0369a1; font-size:0.9rem;"><i class="fas fa-search"></i> View Faculty Timetable</div>
+                        <div style="flex:1; min-width:250px;">
+                            <input type="text" id="search-emp-id" class="msg-input" placeholder="Enter Teacher Name or Employee Code (e.g. E14746)" style="padding:8px; font-size:0.85rem;">
+                        </div>
+                        <button class="btn btn-primary" onclick="searchEmployeeTimetable()" style="margin:0; width:auto;">Search</button>
+                        <button class="btn btn-danger" onclick="clearTimetableSearch()" style="margin:0; width:auto;">Clear</button>
+                    </div>
+                `;
+                }
+                actionBar = searchHTML;
+            }
+
+            if (user.role === 'employee' && (!viewingUserId || viewingUserId === user.id)) {
+                fabAdd = `<div class="fab-add" onclick="scrollToEditForm()" title="Add Slot" style="position:fixed; bottom:20px; right:20px; width:45px; height:45px; background:var(--primary); color:white; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:1.2rem; box-shadow:0 4px 10px rgba(220, 38, 38, 0.3); cursor:pointer; transition:0.2s; z-index:100;"><i class="fas fa-plus"></i></div>`;
+
+                actionBar += `
+                <div class="tt-edit-form" id="edit-form-section" style="background:var(--card-bg); padding:12px; border-radius:var(--radius); margin-bottom:15px; border:1px solid var(--border-color); scroll-margin-top: 10px; box-shadow:var(--shadow);">
+                    <h4 style="margin:0 0 8px 0; font-size:0.85rem;"><i class="fas fa-edit"></i> Add / Edit Slot</h4>
+                    <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); gap:8px; align-items:end;">
+                        <div class="form-group" style="margin:0;"><label style="font-size:0.75rem;">Day</label><select id="tt-edit-day" class="msg-input" style="padding:6px;">${days.map(d => `<option value="${d}">${d}</option>`).join('')}</select></div>
+                        <div class="form-group" style="margin:0;"><label style="font-size:0.75rem;">Time</label><select id="tt-edit-time" class="msg-input" style="padding:6px;">${timetableSlots.map(t => `<option value="${t}">${t}</option>`).join('')}</select></div>
+                        <div class="form-group" style="margin:0;"><label style="font-size:0.75rem;">Subject</label><input type="text" id="tt-edit-subject" class="msg-input" placeholder="Subject" style="padding:6px;"></div>
+                        <div class="form-group" style="margin:0;"><label style="font-size:0.75rem;">Code</label><input type="text" id="tt-edit-code" class="msg-input" placeholder="Code" style="padding:6px;"></div>
+                        <div class="form-group" style="margin:0;"><label style="font-size:0.75rem;">Block</label><input type="text" id="tt-edit-block" class="msg-input" placeholder="Block" style="padding:6px;"></div>
+                        <div class="form-group" style="margin:0;"><label style="font-size:0.75rem;">Room</label><input type="text" id="tt-edit-room" class="msg-input" placeholder="Room" style="padding:6px;"></div>
+                    </div>
+                    <div style="display:flex; gap:10px; margin-top:10px;">
+                        <button class="btn btn-primary btn-sm" onclick="updateTimetableSlot()"><i class="fas fa-save"></i> Save Slot</button> 
+                        <button class="btn btn-danger btn-sm" onclick="deleteSlot()"><i class="fas fa-trash"></i> Delete Selected</button>
+                    </div>
+                </div>
+            `;
+            } else if (viewingUserId && viewingUserId !== user.id) {
+                actionBar += `<div style="background:#fff3cd; padding:8px; border-radius:4px; margin-bottom:10px; border:1px solid #ffeeba; color:#856404; font-size:0.8rem;">Viewing Mode: You can only view this timetable. Switch to your own view to edit.</div>`;
+            }
+
+            let userLabel = viewingUser ? `<h3 style="color:var(--primary); margin-bottom:8px; font-size:0.9rem;">Viewing: ${viewingUser.name} (${viewingUser.uid})</h3>` : '';
+
+            contentArea.innerHTML = `
+            ${headerContent}
+            ${actionBar}
+            ${userLabel}
+            <div class="card tt-table-container" style="overflow:auto; flex:1; border:1px solid var(--border-color);">
+                <table id="tt-table" style="width:100%; border-collapse:collapse;"><thead><tr><th class="tt-day-col">Day</th>${timetableSlots.map(s => `<th class="tt-time-header ${s === 'Short Break' ? 'tt-break' : ''}">${s}</th>`).join('')}</tr></thead><tbody>${rows}</tbody></table>
+            </div>
+            ${fabAdd}
+        `;
+        }
+
+        function loadSlotToEdit(day, time) {
+            const user = state.currentUser;
+            if (user.role !== 'employee') return;
+
+            document.getElementById('tt-edit-day').value = day;
+            document.getElementById('tt-edit-time').value = time;
+            const record = timetableData.find(t => t.userId === user.id && t.day === day && t.time === time);
+            if (record) {
+                document.getElementById('tt-edit-subject').value = record.subject;
+                document.getElementById('tt-edit-code').value = record.courseCode || '';
+                document.getElementById('tt-edit-block').value = record.block || '';
+                document.getElementById('tt-edit-room').value = record.room || '';
+            } else {
+                ['tt-edit-subject', 'tt-edit-code', 'tt-edit-block', 'tt-edit-room'].forEach(id => document.getElementById(id).value = '');
+            }
+            scrollToEditForm();
+        }
+
+        function searchEmployeeTimetable() {
+            const searchVal = document.getElementById('search-emp-id').value.trim().toLowerCase();
+            if (!searchVal) return showToast("Please enter a Name or Code.");
+
+            const targetUser = state.users.find(u =>
+                u.role === 'employee' &&
+                (u.name.toLowerCase().includes(searchVal) || u.uid.toLowerCase().includes(searchVal))
+            );
+
+            if (targetUser) {
+                viewTimetableForUserId = targetUser.id;
+                renderTimetable();
+                showToast(`Showing timetable for ${targetUser.name}`);
+            } else {
+                showToast("Employee not found.");
+            }
+        }
+
+        function clearTimetableSearch() {
+            viewTimetableForUserId = null;
+            document.getElementById('search-emp-id').value = '';
+            renderTimetable();
+        }
+
+        function scrollToEditForm() {
+            const form = document.getElementById('edit-form-section');
+            if (form) {
+                form.scrollIntoView({ behavior: 'smooth' });
+                form.style.transition = "background 0.3s";
+                form.style.backgroundColor = "#fff1f2";
+                setTimeout(() => form.style.backgroundColor = "var(--card-bg)", 500);
+            }
+        }
+
+        function updateTimetableSlot() {
+            const day = document.getElementById('tt-edit-day').value;
+            const time = document.getElementById('tt-edit-time').value;
+            const subject = document.getElementById('tt-edit-subject').value;
+            const code = document.getElementById('tt-edit-code').value;
+            const block = document.getElementById('tt-edit-block').value;
+            const room = document.getElementById('tt-edit-room').value;
+
+            if (!subject || !room) return showToast("Please enter Subject and Room.");
+
+            const existingIndex = timetableData.findIndex(t => t.userId === state.currentUser.id && t.day === day && t.time === time);
+            if (existingIndex > -1) {
+                timetableData[existingIndex] = { userId: state.currentUser.id, day, time, subject, courseCode: code, block: block, room };
+                showToast("Slot Updated!");
+            } else {
+                timetableData.push({ userId: state.currentUser.id, day, time, subject, courseCode: code, block: block, room });
+                showToast("Slot Added!");
+            }
+            saveState();
+            renderTimetable();
+        }
+
+        function deleteSlot() {
+            const day = document.getElementById('tt-edit-day').value;
+            const time = document.getElementById('tt-edit-time').value;
+            const idx = timetableData.findIndex(t => t.userId === state.currentUser.id && t.day === day && t.time === time);
+            if (idx > -1) {
+                timetableData.splice(idx, 1);
+                saveState();
+                showToast("Slot Deleted!");
+                renderTimetable();
+            } else {
+                showToast("No slot selected to delete.");
+            }
+        }
+
+        /* --- PROFILE --- */
+        let isEditingProfile = false;
+        let tempProfilePic = null;
+
+        function renderProfile() {
+            const user = state.currentUser;
+            const photoSrc = user.photo ? user.photo : "";
+
+                       if (!isEditingProfile) {
+                const studentFields = user.role === 'student' ? `
+                <div class="info-box">
+                    <div class="info-icon"><i class="fas fa-id-card"></i></div>
+                    <div class="info-details"><h5>Student Code</h5><span>${user.studentCode || 'N/A'}</span></div>
+                </div>
+                <div class="info-box">
+                    <div class="info-icon"><i class="fas fa-users"></i></div>
+                    <div class="info-details"><h5>Section</h5><span>${user.section || 'N/A'}</span></div>
+                </div>
+                <div class="info-box">
+                    <div class="info-icon"><i class="fas fa-user-tie"></i></div>
+                    <div class="info-details"><h5>Father's Name</h5><span>${user.fatherName || 'N/A'}</span></div>
+                </div>
+                <div class="info-box">
+                    <div class="info-icon"><i class="fas fa-user-friends"></i></div>
+                    <div class="info-details"><h5>Mother's Name</h5><span>${user.otherName || 'N/A'}</span></div>
+                </div>
+            ` : '';
+
+                const empIdDisplay = user.role === 'employee' ? `
+                <div class="info-box">
+                    <div class="info-icon"><i class="fas fa-id-badge"></i></div>
+                    <div class="info-details"><h5>Employee ID</h5><span>${user.uid}</span></div>
+                </div>
+            ` : '';
+
+                let statsHTML = '';
+                if (user.role === 'student') {
+                    statsHTML = `
+                    <div class="stat-box"><h4>${user.cgpa || '0.0'}</h4><p>CGPA</p></div>
+                    <div class="stat-box"><h4>${attendanceData.filter(a => a.userId === user.id && a.status === 'Present').length}</h4><p>Days Present</p></div>
+                    <div class="stat-box"><h4>${state.studentUpdates.length}</h4><p>Updates Viewed</p></div>
+                `;
+                } else {
+                    statsHTML = `
+                    <div class="stat-box"><h4>${getUserWorkload(user.id)}</h4><p>Weekly Classes</p></div>
+                    <div class="stat-box"><h4>${state.studentUpdates.filter(u => u.teacherId === user.id).length}</h4><p>Updates Posted</p></div>
+                    <div class="stat-box"><h4>4.8</h4><p>Rating</p></div>
+                               `;
+            }
+
+            contentArea.innerHTML = `
+                <div class="profile-pro-container">
+                    <div class="profile-card">
+                        <div class="profile-header-bg"><i class="fas fa-university"></i></div>
+                        <div class="profile-pic-wrapper" onclick="document.getElementById('profile-upload-input').click()" title="Change Photo">
+                            ${!photoSrc ? '<i class="fas fa-user fa-3x" style="color:#ddd; width:100%; height:100%; display:flex; align-items:center; justify-content:center;"></i>' : ''}
+                            <img src="${photoSrc}" class="profile-pic-large" ${photoSrc ? '' : 'display:none'}>
+                            <div class="overlay"><i class="fas fa-camera"></i> Change</div>
+                            <div class="verified-badge"><i class="fas fa-check-circle"></i></div>
+                        </div>
+                        <input type="file" id="profile-upload-input" accept="image/*" style="display:none" onchange="previewProfileImage(this)">
+                        <div class="profile-body">
+                            <div class="profile-title-section">
+                                <div>
+                                    <h2 class="profile-name">${user.name} <span class="profile-role-badge">${user.uid}</span></h2>
+                                    <div class="profile-meta" style="margin-top:6px;"><i class="fas fa-id-badge"></i> ${user.role.toUpperCase()} &nbsp;&nbsp; | &nbsp;&nbsp; <i class="fas fa-university"></i> ${user.college}</div>
+                                    <div class="profile-meta" style="margin-top:4px;"><i class="fas fa-building"></i> ${user.dept} ${user.block ? `| ${user.block}` : ''}</div>
+                                </div>
+                                <div class="profile-actions"><button class="btn btn-primary btn-profile-action" onclick="toggleProfileEdit(true)" style="width:auto; padding: 6px 12px;"><i class="fas fa-pen"></i> Edit</button></div>
+                            </div>
+                            <div class="profile-stats">
+                                ${statsHTML}
+                            </div>
+                            <div class="profile-info-grid">
+                                <div class="info-box">
+                                    <div class="info-icon"><i class="fas fa-envelope"></i></div>
+                                    <div class="info-details">
+                                        <h5>Email Address</h5>
+                                        <span>${user.email || 'Not Set'}</span>
+                                    </div>
+                                </div>
+                                <div class="info-box">
+                                    <div class="info-icon"><i class="fab fa-google"></i></div>
+                                    <div class="info-details">
+                                        <h5>Gmail</h5>
+                                        <span>${user.gmail || 'Not Set'}</span>
+                                    </div>
+                                </div>
+                                <div class="info-box">
+                                    <div class="info-icon"><i class="fas fa-phone"></i></div>
+                                    <div class="info-details">
+                                        <h5>Phone Number</h5>
+                                        <span>${user.phone || 'Not Set'}</span>
+                                    </div>
+                                </div>
+                                <div class="info-box">
+                                    <div class="info-icon"><i class="fas fa-map-marker-alt"></i></div>
+                                    <div class="info-details">
+                                        <h5>Campus Location</h5>
+                                        <span>${user.location || 'Not Set'}</span>
+                                    </div>
+                                </div>
+                                ${empIdDisplay}
+                                ${studentFields}
+                                <div class="info-box">
+                                    <div class="info-icon"><i class="fas fa-calendar-check"></i></div>
+                                    <div class="info-details">
+                                        <h5>Join Date</h5>
+                                        <span>${user.joinDate || 'N/A'}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        } else {
+            // --- EDIT MODE ---
+            const studentEditFields = user.role === 'student' ? `
+            <div class="form-group"><label>Student Code</label><input type="text" id="edit-student-code" value="${user.studentCode || ''}" class="msg-input"></div>
+            <div class="form-group"><label>Section</label><input type="text" id="edit-section" value="${user.section || ''}" class="msg-input"></div>
+            <div class="form-group"><label>Gmail</label><input type="email" id="edit-gmail" value="${user.gmail || ''}" class="msg-input"></div>
+            <div class="form-group"><label>Father's Name</label><input type="text" id="edit-father" value="${user.fatherName || ''}" class="msg-input"></div>
+            <div class="form-group"><label>Mother's Name</label><input type="text" id="edit-mother" value="${user.otherName || ''}" class="msg-input"></div>
+        ` : '';
+
+            contentArea.innerHTML = `
+                <div class="profile-pro-container">
+                    <div class="profile-card" style="padding-top: 20px;">
+                        <h3 style="text-align:center; margin-bottom:15px; color:var(--primary);"><i class="fas fa-user-edit"></i> Edit Profile</h3>
+                        <div style="text-align:center; margin-bottom:15px; padding:12px; background:var(--bg-body); border-radius:8px; border:1px dashed var(--border-color);">
+                            <div class="photo-preview-box" style="width:80px; height:80px; border-radius:50%; overflow:hidden; border:3px solid #eee; margin:0 auto 8px auto; background-color:var(--card-bg); display:flex; align-items:center; justify-content:center;">
+                                <img id="edit-preview-img" src="${photoSrc}" alt="Profile Preview" style="width:100%; height:100%; object-fit:cover;">
+                            </div>
+                            <input type="file" id="edit-photo-input" accept="image/*" style="display:none" onchange="previewEditPhoto(this)">
+                            <label for="edit-photo-input" class="upload-label" style="display:inline-block; padding:6px 12px; background:var(--primary); color:white; border-radius:4px; cursor:pointer; font-size:0.75rem;"><i class="fas fa-camera"></i> Upload Photo</label>
+                            <div style="margin-top:6px; font-size:0.7rem; color:var(--text-grey);">Click to change your display picture</div>
+                        </div>
+                        <div style="padding: 0 25px 25px 25px;">
+                            <form onsubmit="event.preventDefault(); saveProfile();">
+                                <div class="edit-form-grid" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap:12px; margin-bottom:15px;">
+                                    <div class="form-group"><label>Full Name</label><input type="text" id="edit-name" value="${user.name}" class="msg-input"></div>
+                                    <div class="form-group"><label>Department</label><input type="text" id="edit-dept" value="${user.dept}" class="msg-input"></div>
+                                    <div class="form-group"><label>Email Address</label><input type="email" id="edit-email" value="${user.email || ''}" class="msg-input"></div>
+                                    <div class="form-group"><label>Phone Number</label><input type="tel" id="edit-phone" value="${user.phone || ''}" class="msg-input"></div>
+                                    <div class="form-group full-width"><label>Campus Location</label><input type="text" id="edit-location" value="${user.location || ''}" class="msg-input" placeholder="e.g. Block A, Room 101"></div>
+                                </div>
+                                ${studentEditFields}
+                                <div style="display:flex; gap:12px; justify-content:center; margin-top:15px; border-top:1px solid var(--border-color); padding-top:15px;">
+                                    <button type="submit" class="btn btn-success" style="width:auto; min-width:100px;">Save Changes</button>
+                                    <button type="button" class="btn btn-danger" onclick="toggleProfileEdit(false)" style="width:auto; min-width:100px;">Cancel</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+    }
+
+    function previewProfileImage(input) {
+        if (input.files && input.files[0]) {
+            var reader = new FileReader();
+            reader.onload = function (e) {
+                tempProfilePic = e.target.result;
+                state.currentUser.photo = tempProfilePic;
+                updateSidebarAvatar(tempProfilePic);
+                renderProfile();
+            }
+            reader.readAsDataURL(input.files[0]);
+        }
+    }
+
+    function previewEditPhoto(input) {
+        if (input.files && input.files[0]) {
+            var reader = new FileReader();
+            reader.onload = function (e) {
+                tempProfilePic = e.target.result;
+                document.getElementById('edit-preview-img').src = tempProfilePic;
+            }
+            reader.readAsDataURL(input.files[0]);
+        }
+    }
+
+    function saveProfile() {
+        const newName = document.getElementById('edit-name').value;
+        const newDept = document.getElementById('edit-dept').value;
+        const newEmail = document.getElementById('edit-email').value;
+        const newPhone = document.getElementById('edit-phone').value;
+        const newLocation = document.getElementById('edit-location').value;
+
+        state.currentUser.name = newName;
+        state.currentUser.dept = newDept;
+        state.currentUser.email = newEmail;
+        state.currentUser.phone = newPhone;
+        state.currentUser.location = newLocation;
+
+        if (tempProfilePic) {
+            state.currentUser.photo = tempProfilePic;
+        }
+
+        if (state.currentUser.role === 'student') {
+            state.currentUser.studentCode = document.getElementById('edit-student-code').value;
+            state.currentUser.section = document.getElementById('edit-section').value;
+            state.currentUser.gmail = document.getElementById('edit-gmail').value;
+            state.currentUser.fatherName = document.getElementById('edit-father').value;
+            state.currentUser.otherName = document.getElementById('edit-mother').value;
+        }
+
+        const idx = state.users.findIndex(u => u.id === state.currentUser.id);
+        if (idx !== -1) {
+            state.users[idx] = state.currentUser;
+            state.users[idx].photo = state.currentUser.photo;
+        }
+
+        saveState();
+        updateSidebarAvatar(state.currentUser.photo);
+        toggleProfileEdit(false);
+        showToast("Profile Updated Successfully!");
+    }
+
+    function getUserWorkload(userId) { return timetableData.filter(t => t.userId === userId).length; }
+
+    function toggleProfileEdit(enable) {
+        isEditingProfile = enable;
+        if (!enable) { tempProfilePic = null; }
+        renderProfile();
+    }
+
+    /* --- GLOBAL SEARCH --- */
+    function handleGlobalSearch(e) {
+        if (e.key === 'Enter') {
+            const query = e.target.value.toLowerCase().trim();
+            if (!query) return;
+
+            if (query.includes('timetable')) { loadSection('timetable'); return; }
+            if (query.includes('attendance')) { loadSection('attendance'); return; }
+            if (query.includes('message')) { loadSection('messages'); return; }
+            if (query.includes('adjust')) { loadSection('adjustments'); return; }
+            if (query.includes('profile')) { loadSection('profile'); return; }
+            if (query.includes('class') || query.includes('update')) { loadSection('class-update'); return; }
+            if (query.includes('syllabus')) { loadSection('syllabus'); return; }
+
+            const user = state.users.find(u => u.name.toLowerCase().includes(query) || u.uid.toLowerCase().includes(query));
+            if (user) {
+                viewTimetableForUserId = user.id;
+                loadSection('timetable');
+                showToast(`Showing Timetable: ${user.name}`);
+                return;
+            }
+
+            showToast("No results found.");
+        }
+    }
+
+    /* --- STUDENT ATTENDANCE MARKER --- */
+    function markStudentAttendance(time, subject) {
+        const todayStr = new Date().toISOString().split('T')[0];
+        attendanceData = attendanceData.filter(a => !(a.userId === state.currentUser.id && a.date === todayStr && a.timeSlot === time));
+        attendanceData.push({
+            userId: state.currentUser.id,
+            date: todayStr,
+            timeSlot: time,
+            subject: subject,
+            status: 'Present',
+            timestamp: new Date().toISOString()
+        });
+        saveState();
+        showToast("Marked Present for " + subject);
+        renderAttendanceView();
+    }
+
+    function showToast(msg) {
+        const t = document.getElementById('toast');
+        t.innerText = msg;
+        t.className = "show";
+        setTimeout(() => t.className = t.className.replace("show", ""), 3000);
+    }
+
+    // Initialize Timetable data from LocalStorage if available (to persist changes)
+    if (localStorage.getItem('fms_timetable')) {
+        const savedTT = JSON.parse(localStorage.getItem('fms_timetable'));
+        savedTT.forEach(item => {
+            if (!timetableData.find(t => t.userId === item.userId && t.day === item.day && t.time === item.time)) {
+                timetableData.push(item);
+            }
+        });
+    }
+
+    document.addEventListener('contextmenu', function (e) {
+        e.preventDefault();
+    });
+
+    </script>
+</body>
+</html>

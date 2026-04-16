@@ -1,0 +1,2415 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>University Management System</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root {
+            /* UPDATED THEME */
+            --primary: #dc2626; /* Deep Red (CU Brand Color) */
+            --secondary: #1a1a2e; /* Dark Navy/Black */
+            --accent: #ef4444; /* Bright Red */
+            --accent-dark: #b91c1c; /* Darker Red */
+            --success: #16a34a; /* Emerald Green */
+            --danger: #991b1b;  /* Deep Red (for warnings) */
+            --warning: #f59e0b;
+            --light: #fafafa;
+            --dark: #1f2937;
+            --text-grey: #666;
+            --shadow: 0 4px 6px rgba(220, 38, 38, 0.1);
+            --radius: 8px;
+            --gold: #D4AF37;
+            --student-primary: #008069; /* WhatsApp Green */
+            --chat-bg: #f0f2f5;
+            --border-color: #e5e7eb;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        
+        body { background-color: #f9fafb; color: #333; height: 100vh; display: flex; flex-direction: column; }
+
+        /* --- Navigation --- */
+        nav { background-color: var(--primary); color: white; padding: 0.8rem 2rem; display: flex; justify-content: space-between; align-items: center; box-shadow: var(--shadow); z-index: 1000; }
+        .logo { font-size: 1.4rem; font-weight: bold; display: flex; align-items: center; gap: 10px; cursor: default; }
+        .college-display { font-size: 0.8rem; background: rgba(255,255,255,0.15); padding: 4px 10px; border-radius: 4px; margin-right: 15px; cursor: pointer; transition: 0.3s; text-decoration: none; color: white; border: 1px solid rgba(255,255,255,0.2); }
+        .college-display:hover { background: rgba(255,255,255,0.25); }
+        
+        .nav-links { display: flex; align-items: center; gap: 15px; }
+        .nav-links button, .nav-links a { background: none; border: none; color: rgb(255, 255, 255); cursor: pointer; font-size: 0.95rem; display: flex; align-items: center; gap: 5px; text-decoration: none; transition: 0.2s; }
+        .nav-links button:hover { color: var(--gold); }
+
+        /* Dropdown Styles - UPDATED FOR BLACK TEXT */
+        .dropdown-wrapper { position: relative; display: inline-block; }
+        .icon-btn { background: none; border: none; color: white; font-size: 1.2rem; cursor: pointer; position: relative; padding: 5px; border-radius: 50%; transition: 0.2s; }
+        .icon-btn:hover { background-color: rgba(255,255,255,0.1); }
+        .notif-badge { position: absolute; top: 0px; right: 0px; background: var(--warning); color: white; font-size: 0.6rem; padding: 2px 5px; border-radius: 50%; border: 1px solid white; }
+        
+        .dropdown-menu {
+            display: none;
+            position: absolute;
+            right: 0;
+            top: 100%;
+            background-color: white;
+            min-width: 250px;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+            z-index: 2000;
+            border-radius: var(--radius);
+            overflow: hidden;
+            margin-top: 5px;
+        }
+        .dropdown-item { padding: 12px 15px; text-decoration: none; display: block; color: #000000 !important; /* BLACK TEXT ADDED */ border-bottom: 1px solid #eee; cursor: pointer; font-size: 0.9rem; transition: 0.2s; background: white; }
+        .dropdown-item:hover { background-color: #f1f1f1; color: var(--primary) !important; }
+        .dropdown-header { padding: 10px 15px; background: #f8f9fa; font-weight: bold; color: var(--primary); border-bottom: 1px solid #ddd; color: var(--primary); }
+
+        /* --- Auth View --- */
+        #auth-view { width: 100%; height: 100%; display: flex; justify-content: center; align-items: center; background: linear-gradient(135deg, var(--primary), var(--secondary)); position: absolute; top: 0; left: 0; z-index: 2000; }
+        .auth-box { background: white; padding: 2.5rem; border-radius: var(--radius); box-shadow: 0 10px 25px rgba(0,0,0,0.2); width: 400px; max-width: 90%; text-align: center; }
+        .form-group { margin-bottom: 1rem; text-align: left; }
+        .form-group label { display: block; margin-bottom: 0.5rem; color: var(--text-grey); font-size: 0.9rem; }
+        .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; transition: 0.2s; }
+        .form-group input:focus { border-color: var(--accent); outline: none; }
+        .btn { padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; width: 100%; margin-top: 10px; font-weight: 600; transition: 0.2s; }
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-primary:hover { background: #b91c1c; }
+        .btn-danger { background: var(--danger); color: white; }
+        .btn-success { background: var(--success); color: white; }
+        .btn-warning { background: var(--warning); color: white; }
+        .btn-sm { width: auto; padding: 8px; font-size: 0.85rem; margin: 0; display: inline-flex; align-items: center; justify-content: center;}
+        .forgot-pass { color: var(--accent); cursor: pointer; font-size: 0.8rem; text-align: right; display: block; margin-top: 5px; }
+
+        /* --- Dashboard Layout --- */
+        #dashboard-view { display: none; width: 100%; height: 100%; flex-direction: column; }
+        .d-container { display: flex; flex: 1; overflow: hidden; }
+        
+        /* Sidebar */
+        .sidebar { width: 250px; background: white; border-right: 1px solid #ddd; display: flex; flex-direction: column; overflow-y: auto; flex-shrink: 0; }
+        .user-profile { padding: 20px; text-align: center; border-bottom: 1px solid #eee; }
+        .user-avatar { 
+            width: 80px; height: 80px; border-radius: 50%; background: var(--light); 
+            margin: 0 auto 10px; display: flex; align-items: center; justify-content: center; 
+            font-size: 2rem; color: var(--secondary); overflow: hidden; border: 3px solid #ddd;
+            background-size: cover; background-position: center;
+        }
+        .menu-item { padding: 15px 20px; cursor: pointer; color: var(--text-grey); display: flex; align-items: center; gap: 10px; transition: 0.2s; border-left: 4px solid transparent; }
+        .menu-item:hover, .menu-item.active { background: #fff1f2; color: var(--primary); border-left: 4px solid var(--primary); }
+
+        /* Main Content */
+        .main-content { flex: 1; padding: 25px; overflow-y: auto; background: #f9fafb; position: relative; }
+
+        /* --- DASHBOARD GRID & CALENDAR --- */
+        .dashboard-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 20px; margin-bottom: 20px; }
+
+        .calendar-widget {
+            background: white;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            padding: 15px;
+            height: 400px; 
+            display: flex;
+            flex-direction: column;
+        }
+        .calendar-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+        .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; flex: 1; }
+        .cal-day-name { font-weight: bold; text-align: center; color: var(--text-grey); font-size: 0.8rem; }
+        
+        .cal-day { 
+            background: #f9f9f9; border-radius: 4px; 
+            display: flex; align-items: center; justify-content: center; 
+            font-size: 0.9rem; cursor: default; aspect-ratio: 1; position: relative; transition: 0.2s;
+            overflow: hidden; padding: 2px; box-sizing: border-box; line-height: 1.2; border: 1px solid #eee;
+        }
+        .cal-day:hover { background: #eef2f5; }
+        .cal-day.today { border: 2px solid var(--primary); font-weight: bold; }
+        
+        /* DASHBOARD CALENDAR COLORS - FULL BACKGROUND NO BORDER */
+        .status-present { background-color: #dcfce7 !important; color: #166534 !important; border: none !important; } 
+        .status-absent { background-color: #fee2e2 !important; color: #991b1b !important; border: none !important; } 
+        .status-none { background-color: #f8f9fa !important; color: #ccc !important; border: 1px solid #eee; }
+        .status-short { background-color: #fef3c7 !important; color: #92400e !important; border: none !important; font-weight:bold;}
+        .status-medical { background-color: #dbeafe !important; color: #1e40af !important; border: none !important; font-weight:bold;}
+        .status-halfday { background-color: #f3e8ff !important; color: #6b21a8 !important; border: none !important; font-weight:bold;}
+        
+        .cal-day.empty { background: transparent; border: none; cursor: default; }
+
+        .disclaimer-box { margin-top: 20px; padding: 10px 15px; background-color: #fff7ed; color: #9a3412; border-radius: 4px; font-size: 0.85rem; border-left: 4px solid #fdba74; display: flex; align-items: center; gap: 10px; }
+
+        /* Cards */
+        .stat-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; }
+        .stat-card { background: white; padding: 20px; border-radius: var(--radius); box-shadow: var(--shadow); text-align: center; cursor: pointer; transition: transform 0.2s; border-left: 5px solid var(--accent); }
+        .stat-card:hover { transform: translateY(-5px); }
+        .stat-card h3 { font-size: 1.8rem; color: var(--dark); margin: 5px 0; }
+        .stat-card p { color: var(--text-grey); font-size: 0.9rem; }
+
+        .card { background: white; padding: 20px; border-radius: var(--radius); box-shadow: var(--shadow); margin-bottom: 20px; overflow-x: auto; position: relative;} 
+        .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border-bottom: 1px solid #eee; padding-bottom: 10px; flex-wrap: wrap; gap: 10px; }
+
+        /* Tables */
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; min-width: 700px; } 
+        th, td { padding: 12px; text-align: center; border: 1px solid #ddd; font-size: 0.9rem; }
+        th { background: #f8f9fa; color: var(--secondary); font-weight: bold; text-transform: uppercase; font-size: 0.8rem; }
+        
+        /* Timetable Specific */
+        .tt-day-col { background: #fff1f2; font-weight: bold; text-align: left; padding-left: 15px !important; width: 100px; }
+        .tt-time-header { background: var(--secondary); color: white; font-size: 0.8rem; padding: 8px 2px; }
+        .tt-cell { min-width: 110px; height: 70px; vertical-align: middle; cursor: pointer; transition: background 0.2s; position: relative; border: 1px solid #ddd; }
+        .tt-cell:hover { background-color: #ffe4e6; }
+        
+        /* PLUS BUTTON FOR TIMETABLE */
+        .tt-plus-btn {
+            position: absolute; bottom: 2px; right: 2px; 
+            background: var(--success); color: white; 
+            border-radius: 50%; width: 24px; height: 24px; 
+            display: flex; align-items: center; justify-content: center; 
+            font-size: 14px; opacity: 0; transition: 0.2s;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            pointer-events: none; /* Let click pass to cell */
+        }
+        .tt-cell:hover .tt-plus-btn { opacity: 1; }
+
+        .tt-content { font-size: 0.8rem; line-height: 1.1; pointer-events: none; }
+        .tt-subj { font-weight: bold; display: block; color: var(--primary); font-size: 0.9rem; }
+        .tt-code { font-size: 0.7rem; color: #7f8c8d; display: block; }
+        .tt-block { font-size: 0.7rem; color: #e67e22; font-weight: bold; display: inline-block; background: #fdf2e9; padding: 1px 3px; border-radius: 3px; margin-top: 2px;}
+        .tt-room { font-size: 0.7rem; color: var(--success); font-weight: bold; margin-top: 4px; display: block; }
+        .tt-free { color: #ccc; font-size: 1.5rem; font-weight: bold; } 
+        .tt-break { background-color: #fef3c7; color: #92400e; font-weight: bold; font-size: 0.9rem; }
+
+        /* Status Badges */
+        .status-badge { padding: 4px 10px; border-radius: 12px; font-size: 0.75rem; font-weight: bold; display: inline-block; }
+        .badge-pending { background: #fed7aa; color: #9a3412; }
+        .badge-approved { background: #bbf7d0; color: #166534; }
+        .badge-rejected { background: #fecaca; color: #991b1b; }
+
+        /* Action Buttons in Table */
+        .action-btn { padding: 8px; border: none; border-radius: 4px; cursor: pointer; color: white; font-size: 0.9rem; margin-right: 5px; display: inline-flex; align-items: center; justify-content: center;}
+        .btn-approve { background-color: var(--success); }
+        .btn-reject { background-color: var(--danger); }
+        .btn-edit { background-color: var(--accent); }
+        .btn-delete { background-color: var(--danger); }
+
+        /* --- ATTENDANCE SPLIT LAYOUT --- */
+        .attendance-split-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 25px; height: 100%; }
+        .att-left-panel { display: flex; flex-direction: column; }
+        .att-action-card { background: white; padding: 30px; border-radius: var(--radius); box-shadow: var(--shadow); text-align: center; height: 100%; border-top: 5px solid var(--primary); display: flex; flex-direction: column; justify-content: center; }
+        .att-header-prof { text-align: center; margin-bottom: 20px; }
+        .att-header-prof h2 { color: var(--primary); margin-bottom: 5px; font-size: 1.8rem; text-transform: uppercase; letter-spacing: 1px; }
+        .att-header-prof p { color: var(--text-grey); font-size: 1.1rem; font-weight: 500; }
+
+        .wifi-btn { background: linear-gradient(135deg, #dc2626, #b91c1c); color: white; border: none; padding: 15px 30px; border-radius: 50px; cursor: pointer; font-weight: bold; display: inline-flex; align-items: center; justify-content: center; gap: 10px; box-shadow: 0 4px 10px rgba(220, 38, 38, 0.3); transition: all 0.3s; width: 80%; margin: 0 auto; font-size: 1.1rem; }
+        .wifi-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 15px rgba(220, 38, 38, 0.4); }
+        .wifi-btn:disabled { background: #ccc; cursor: not-allowed; transform: none; box-shadow: none; color: #666; }
+        .wifi-connected { background: linear-gradient(135deg, var(--success), #15803d); cursor: default; }
+
+        .leave-options-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-top: 20px; padding-top: 20px; border-top: 1px dashed #ccc; }
+        .leave-btn { padding: 10px; border: 1px solid #ddd; background: white; border-radius: 6px; cursor: pointer; font-size: 0.9rem; font-weight: 600; color: var(--secondary); transition: 0.2s; display: flex; flex-direction: column; align-items: center; gap: 5px; }
+        .leave-btn i { font-size: 1.2rem; color: var(--accent); }
+        .leave-btn:hover { background: #fff1f2; border-color: var(--accent); }
+        .leave-btn.short { color: #92400e; }
+        .leave-btn.short i { color: #f59e0b; }
+        .leave-btn.medical { color: #1e40af; }
+        .leave-btn.medical i { color: #3b82f6; }
+        .leave-btn.half { color: #6b21a8; }
+        .leave-btn.half i { color: #8b5cf6; }
+        .leave-btn:disabled { background: #f3f4f6; color: #9ca3af; border-color: #e5e7eb; cursor: not-allowed; pointer-events: none; }
+
+        .att-right-panel { display: flex; flex-direction: column; height: 100%; }
+        .attendance-wrapper { background: white; padding: 25px; border-radius: var(--radius); box-shadow: var(--shadow); display: flex; flex-direction: column; height: 100%; border-top: 5px solid var(--accent); }
+        .attendance-calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 10px; margin-top: 20px; flex: 1; }
+        
+        .cal-cell { aspect-ratio: 1; border: 1px solid #eee; border-radius: 8px; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 1.1rem; font-weight: bold; color: #555; background: #fff; transition: transform 0.2s, box-shadow 0.2s; position: relative; overflow: hidden; padding: 2px; line-height: 1.2; }
+        .cal-cell:hover { transform: translateY(-3px); box-shadow: 0 4px 8px rgba(0,0,0,0.1); z-index: 2; }
+        .cal-cell.today { border: 2px solid var(--primary); transform: scale(1.05); z-index: 10; }
+
+        /* FULL COLOR CALENDAR CELLS FOR ATTENDANCE PAGE */
+        .cal-cell.status-present { background-color: #dcfce7 !important; color: #166534 !important; border: none !important; } 
+        .cal-cell.status-absent { background-color: #fee2e2 !important; color: #991b1b !important; border: none !important; } 
+        .cal-cell.status-none { background-color: #f8f9fa !important; color: #ccc !important; border: 1px solid #eee; }
+        .cal-cell.status-short { background-color: #fef3c7 !important; color: #92400e !important; border: none !important; }
+        .cal-cell.status-medical { background-color: #dbeafe !important; color: #1e40af !important; border: none !important; }
+        .cal-cell.status-halfday { background-color: #f3e8ff !important; color: #6b21a8 !important; border: none !important; }
+
+        .selfie-btn { background: linear-gradient(135deg, var(--primary), var(--accent-dark)); color: white; border: none; padding: 18px 40px; border-radius: 50px; cursor: pointer; font-weight: bold; display: inline-flex; align-items: center; justify-content: center; gap: 15px; box-shadow: 0 8px 15px rgba(220, 38, 38, 0.3); transition: all 0.3s; width: 80%; margin: 0 auto; font-size: 1.2rem; letter-spacing: 0.5px; }
+        .selfie-btn:hover { transform: translateY(-3px); box-shadow: 0 12px 20px rgba(220, 38, 38, 0.4); }
+        .selfie-btn:disabled { background: #e5e7eb; cursor: not-allowed; transform: none; box-shadow: none; color: #9ca3af; }
+
+        /* --- MESSAGES SECTION --- */
+        .modern-msg-container { display: grid; grid-template-columns: 1fr 1fr; gap: 25px; height: 80vh; }
+        .modern-compose-pane { background: white; border-radius: var(--radius); box-shadow: var(--shadow); padding: 25px; display: flex; flex-direction: column; border-top: 5px solid var(--primary); overflow-y: auto; }
+        .modern-list-pane { background: white; border-radius: var(--radius); box-shadow: var(--shadow); display: flex; flex-direction: column; overflow: hidden; }
+        .modern-msg-header { padding: 20px 25px; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center; background: #fafbfc; }
+        .modern-msg-list { flex: 1; overflow-y: auto; padding: 0; }
+        .modern-msg-item { display: flex; padding: 20px 25px; border-bottom: 1px solid #f0f0f0; cursor: pointer; transition: background 0.2s; gap: 20px; }
+        .modern-msg-item:hover { background: #f8f9fa; }
+        .modern-msg-item.unread { background: #fef2f2; border-left: 4px solid var(--accent); }
+        .modern-avatar { width: 50px; height: 50px; border-radius: 50%; object-fit: cover; border: 2px solid #eee; flex-shrink: 0; }
+        .modern-content { flex: 1; min-width: 0; }
+        .modern-top-row { display: flex; justify-content: space-between; margin-bottom: 5px; }
+        .modern-sender { font-weight: 700; color: var(--dark); font-size: 1rem; }
+        .modern-time { font-size: 0.85rem; color: #999; }
+        .modern-subject { font-weight: 600; color: var(--primary); font-size: 0.95rem; margin-bottom: 5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .modern-snippet { font-size: 0.9rem; color: #666; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .modern-input-group { margin-bottom: 20px; }
+        .modern-input-label { display: block; font-weight: 600; color: var(--secondary); margin-bottom: 8px; font-size: 0.9rem; }
+        .modern-input-field { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 6px; font-size: 0.95rem; transition: 0.2s; background: #fafafa; }
+        .modern-input-field:focus { border-color: var(--accent); background: white; outline: none; box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1); }
+        .modern-textarea { resize: none; height: 150px; line-height: 1.5; }
+        .msg-toggle-btn { background: none; border: none; padding: 8px 16px; font-weight: 600; color: #7f8c8d; cursor: pointer; border-bottom: 2px solid transparent; }
+        .msg-toggle-btn.active { color: var(--primary); border-bottom-color: var(--primary); }
+
+        /* --- ADJUSTMENT SECTION LAYOUT --- */
+        .adj-layout { display: grid; grid-template-columns: 320px 1fr; gap: 25px; }
+        .adj-left { display: flex; flex-direction: column; }
+        .adj-right { display: flex; flex-direction: column; gap: 20px; }
+        .adj-notification { background: #fff7ed; color: #9a3412; padding: 15px; border-radius: 8px; margin-bottom: 20px; display: flex; align-items: center; gap: 15px; border-left: 5px solid #fdba74; }
+        .adj-photo-cell { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; border: 2px solid #ddd; display: block; margin: 0 auto 5px auto; }
+
+        /* --- CLASS UPDATE LAYOUT --- */
+        .msg-container { display: flex; gap: 20px; height: 78vh; }
+        .msg-pane { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+        .msg-compose-card { background: white; border: 1px solid #e0e0e0; border-radius: var(--radius); padding: 20px; height: 100%; display: flex; flex-direction: column; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+        .msg-form-group { margin-bottom: 15px; }
+        .msg-form-group label { display: block; margin-bottom: 5px; font-weight: 600; color: var(--primary); font-size: 0.85rem; }
+        .msg-input, .msg-textarea { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 6px; font-size: 0.9rem; transition: 0.2s; }
+        .msg-input:focus, .msg-textarea:focus { border-color: var(--accent); outline: none; }
+        .msg-textarea { resize: none; flex: 1; min-height: 100px; }
+        .update-card { border-left: 4px solid var(--accent); background: #fff1f2; padding: 15px; margin-bottom: 10px; border-radius: 4px; position: relative;}
+        .update-card.read { opacity: 0.6; background: #f9f9f9; border-left-color: #ccc; }
+        .update-actions { position: absolute; top: 10px; right: 10px; display: flex; gap: 5px; }
+        .update-action-btn { background: none; border: none; cursor: pointer; font-size: 0.9rem; padding: 4px; border-radius: 4px; transition: 0.2s; }
+        .update-action-btn.edit { color: var(--primary); }
+        .update-action-btn.edit:hover { background: #fee2e2; }
+        .update-action-btn.delete { color: var(--danger); }
+        .update-action-btn.delete:hover { background: #fee2e2; }
+
+        /* --- PROFESSIONAL PROFILE SECTION --- */
+        .profile-pro-container { max-width: 1000px; margin: 0 auto; padding-bottom: 50px; }
+        .profile-card { background: white; border-radius: 16px; box-shadow: 0 15px 35px rgba(0,0,0,0.1); overflow: hidden; position: relative; margin-top: 20px; }
+        .profile-header-bg { height: 160px; background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%); position: relative; display: flex; align-items: center; justify-content: center; color: rgba(255,255,255,0.2); font-size: 4rem; }
+        .profile-pic-wrapper { position: absolute; top: 80px; left: 40px; width: 150px; height: 150px; background: white; border: 6px solid white; border-radius: 50%; overflow: hidden; box-shadow: 0 8px 20px rgba(0,0,0,0.2); z-index: 10; cursor: pointer; transition: 0.3s; }
+        .profile-pic-wrapper:hover { transform: scale(1.05); }
+        .profile-pic-large { width: 100%; height: 100%; object-fit: cover; }
+        .verified-badge { position: absolute; bottom: 5px; right: 5px; width: 36px; height: 36px; background: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: var(--success); font-size: 18px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .profile-body { padding: 90px 40px 40px 40px; position: relative; }
+        .profile-title-section { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 30px; border-bottom: 1px solid #eee; padding-bottom: 20px; flex-wrap: wrap; gap: 20px;}
+        .profile-name { font-size: 2rem; color: var(--dark); font-weight: 800; margin-bottom: 5px; display: flex; align-items: center; gap: 10px; }
+        .profile-role-badge { background: var(--primary); color: white; padding: 6px 16px; border-radius: 20px; font-size: 0.8rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; box-shadow: 0 4px 6px rgba(220, 38, 38, 0.2); }
+        .profile-meta { color: var(--text-grey); font-size: 1rem; font-weight: 500; }
+        .profile-meta i { width: 20px; color: var(--primary); margin-right: 5px; }
+        .profile-actions { display: flex; gap: 10px; margin-top: auto;}
+        .btn-profile-action { border-radius: 8px; font-weight: 600; display: flex; align-items: center; gap: 6px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); transition: transform 0.2s;}
+        .btn-profile-action:hover { transform: translateY(-2px); }
+        
+        .profile-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 25px; margin-bottom: 35px; }
+        .stat-box { background: #f8f9fa; border: 1px solid #e9ecef; border-radius: 12px; padding: 25px; text-align: center; transition: transform 0.2s, box-shadow 0.2s; }
+        .stat-box:hover { transform: translateY(-5px); border-color: var(--accent); box-shadow: 0 5px 15px rgba(0,0,0,0.05); }
+        .stat-box h4 { font-size: 2.5rem; color: var(--dark); margin-bottom: 5px; font-weight: 800; }
+        .stat-box p { color: var(--text-grey); font-size: 0.9rem; text-transform: uppercase; letter-spacing: 1px; font-weight: 700; }
+        
+        .profile-info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .info-box { background: #fff; border: 1px solid #eee; border-radius: 12px; padding: 20px; display: flex; align-items: center; gap: 20px; transition: 0.2s; }
+        .info-box:hover { background: #fdfdfd; border-color: #ddd; }
+        .info-icon { width: 50px; height: 50px; background: #fff1f2; color: var(--accent); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.3rem; flex-shrink: 0; }
+        .info-details h5 { font-size: 0.85rem; color: var(--text-grey); text-transform: uppercase; margin-bottom: 2px; font-weight: 700; }
+        .info-details span { font-size: 1.1rem; color: var(--dark); font-weight: 600; }
+        .overlay { position: absolute; top:0; left:0; width:100%; height: 100%; background:rgba(0,0,0,0.5); border-radius:50%; display:flex; justify-content:center; align-items:center; color:white; opacity:0; transition:0.3s; cursor: pointer; }
+        .profile-pic-wrapper:hover .overlay { opacity: 1; }
+
+        .edit-form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px; }
+        .full-width { grid-column: 1 / -1; }
+        .photo-preview-box { width: 150px; height: 150px; border-radius: 50%; overflow: hidden; border: 4px solid #eee; margin: 0 auto 15px auto; background-color: #f9f9f9; display: flex; align-items: center; justify-content: center; }
+        .photo-preview-box img { width: 100%; height: 100%; object-fit: cover; }
+        .upload-label { display: inline-block; padding: 8px 16px; background: var(--accent); color: white; border-radius: 4px; cursor: pointer; font-size: 0.9rem; transition: 0.2s; }
+        .upload-label:hover { background: var(--accent-dark); }
+
+        /* --- PROPER STUDENT CHAT --- */
+        .proper-chat-container { display: flex; flex-direction: column; height: 80vh; background: var(--chat-bg); box-shadow: 0 4px 10px rgba(0,0,0,0.1); border-radius: 12px; overflow: hidden; border: 1px solid #ddd; }
+        .chat-header { background: var(--primary); color: white; padding: 15px 20px; display: flex; align-items: center; justify-content: space-between; }
+        .chat-header-icons { display: flex; gap: 15px; }
+        .chat-icon-btn { background: rgba(255,255,255,0.2); border: none; color: white; width: 35px; height: 35px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: 0.2s;}
+        .chat-icon-btn:hover { background: rgba(255,255,255,0.4); }
+        .chat-area { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 10px; }
+        .chat-bubble { max-width: 70%; padding: 10px 15px; border-radius: 10px; position: relative; font-size: 0.95rem; line-height: 1.4; box-shadow: 0 1px 1px rgba(0,0,0,0.1); }
+        .chat-bubble.left { background: white; color: #333; align-self: flex-start; border: 1px solid #eee; }
+        .chat-bubble.right { background: var(--primary); color: white; align-self: flex-end; }
+        .chat-time { font-size: 0.7rem; color: #999; float: right; margin-top: 5px; margin-left: 10px; }
+        .right .chat-time { color: rgba(255,255,255,0.7); }
+        .chat-input-area { background: white; padding: 10px; display: flex; gap: 10px; align-items: center; border-top: 1px solid #ddd; }
+        .chat-input { flex: 1; padding: 12px; border-radius: 20px; border: 1px solid #ddd; outline: none; }
+        .chat-send-btn { background: var(--primary); color: white; width: 40px; height: 40px; border-radius: 50%; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+
+        .student-dashboard-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 20px; }
+        .sd-card { background: white; padding: 20px; border-radius: var(--radius); box-shadow: var(--shadow); border-top: 4px solid var(--accent); }
+        .sd-card h3 { font-size: 2rem; color: var(--primary); margin-bottom: 5px; }
+        .sd-card p { color: var(--text-grey); font-size: 0.9rem; text-transform: uppercase; }
+
+        /* --- NEW TIMELINE STYLE FOR UPDATES --- */
+        .updates-timeline { position: relative; max-width: 800px; margin: 0 auto; padding: 20px 0; }
+        .updates-timeline::before { content: ''; position: absolute; left: 20px; top: 0; bottom: 0; width: 4px; background: #e5e7eb; }
+        .timeline-item { position: relative; padding-left: 60px; margin-bottom: 30px; }
+        .timeline-icon { position: absolute; left: 0; top: 0; width: 44px; height: 44px; background: white; border: 4px solid var(--primary); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: var(--primary); z-index: 1; }
+        .timeline-content { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); border-left: 4px solid var(--primary); }
+        .timeline-date { font-size: 0.8rem; color: #888; margin-bottom: 5px; font-weight: 600; }
+
+        /* Floating Action Button */
+        .fab-add { position: fixed; bottom: 30px; right: 30px; width: 60px; height: 60px; background: var(--primary); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 24px; box-shadow: 0 4px 10px rgba(220, 38, 38, 0.4); cursor: pointer; transition: transform 0.2s; z-index: 100; }
+        .fab-add:hover { transform: scale(1.1); }
+
+        /* Modals */
+        .modal { display: none; position: fixed; z-index: 3000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); align-items: center; justify-content: center; }
+        .modal-content { background-color: white; padding: 25px; border-radius: var(--radius); width: 500px; max-width: 90%; text-align: center; box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
+        .modal-actions { display: flex; gap: 10px; margin-top: 20px; justify-content: center; }
+
+        .camera-view { width: 100%; height: 300px; background-color: #000; margin-bottom: 15px; border-radius: 8px; display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden; color: white; flex-direction: column; }
+        .camera-overlay { position: absolute; width: 250px; height: 250px; border: 2px dashed rgba(255,255,255,0.7); border-radius: 50%; pointer-events: none; }
+        #live-video { width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1); }
+        #captured-image { display: none; width: 100%; height: 100%; object-fit: cover; }
+        
+        #toast { visibility: hidden; min-width: 250px; background-color: var(--secondary); color: #fff; text-align: center; border-radius: 4px; padding: 16px; position: fixed; z-index: 4000; left: 50%; bottom: 30px; transform: translateX(-50%); box-shadow: 0 4px 12px rgba(0,0,0,0.2); font-weight: 500; }
+        #toast.show { visibility: visible; animation: fadein 0.5s, fadeout 0.5s 2.5s; }
+        @keyframes fadein { from {bottom: 0; opacity: 0;} to {bottom: 30px; opacity: 1;} }
+        @keyframes fadeout { from {bottom: 30px; opacity: 1;} to {bottom: 0; opacity: 0;} }
+
+        /* Delete Class Item Styling */
+        .class-item-list { margin-top: 10px; max-height: 150px; overflow-y: auto; border: 1px solid #eee; border-radius: 4px; }
+        .class-item-row { display: flex; justify-content: space-between; padding: 8px; border-bottom: 1px solid #f0f0f0; font-size: 0.85rem; }
+        .class-item-row:last-child { border-bottom: none; }
+        .btn-delete-small { color: var(--danger); cursor: pointer; font-size: 0.8rem; }
+
+        @media (max-width: 900px) {
+            .attendance-split-layout { grid-template-columns: 1fr; }
+            .att-left-panel { order: 2; }
+            .att-right-panel { order: 1; height: 400px; }
+            .adj-layout { grid-template-columns: 1fr; }
+            .msg-container, .modern-msg-container { flex-direction: column; height: auto; grid-template-columns: 1fr; }
+            .profile-title-section { flex-direction: column; gap: 15px; }
+            .profile-stats { grid-template-columns: 1fr; }
+            .profile-info-grid { grid-template-columns: 1fr; }
+            .profile-pic-wrapper { left: 50%; transform: translateX(-50%); width: 120px; height: 120px; top: 60px; }
+            .profile-body { padding: 90px 20px 20px 20px; text-align: center; }
+            .dashboard-grid { grid-template-columns: 1fr; }
+            .calendar-widget { height: 300px; }
+            .updates-timeline::before { left: 20px; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Toast -->
+    <div id="toast">Notification</div>
+
+    <!-- Navigation -->
+    <nav>
+        <a href="https://www.cuchd.in" target="_blank" class="college-display" title="Visit Official Website">
+            <i class="fas fa-building"></i> <span id="nav-college-name">Chandigarh University</span>
+        </a>
+
+        <div class="nav-links">
+            <div class="dropdown-wrapper">
+                <button class="icon-btn" onclick="toggleDropdown('settings-dropdown')">
+                    <i class="fas fa-cog"></i>
+                </button>
+                <div id="settings-dropdown" class="dropdown-menu">
+                    <div class="dropdown-header">Quick Settings</div>
+                    <a class="dropdown-item" onclick="loadSection('profile'); closeAllDropdowns();"><i class="fas fa-user-circle"></i> My Profile</a>
+                    <a class="dropdown-item" onclick="openForgotModal(); closeAllDropdowns();"><i class="fas fa-key"></i> Reset Password</a>
+                </div>
+            </div>
+
+            <div class="dropdown-wrapper">
+                <button class="icon-btn" onclick="toggleDropdown('notif-dropdown')">
+                    <i class="fas fa-bell"></i>
+                    <span id="notif-count" class="notif-badge" style="display:none;">0</span>
+                </button>
+                <div id="notif-dropdown" class="dropdown-menu">
+                    <div class="dropdown-header">Notifications</div>
+                    <div id="notif-list-dropdown"></div>
+                </div>
+            </div>
+
+            <button onclick="logout()">Logout <i class="fas fa-sign-out-alt"></i></button>
+        </div>
+    </nav>
+
+    <!-- Auth View -->
+    <div id="auth-view">
+        <div class="auth-box">
+            <h2 style="margin-bottom:20px; color:var(--primary);">Portal Login</h2>
+            <form id="login-form">
+                <div class="form-group">
+                    <label>Select Role</label>
+                        <select id="login-role" onchange="updateLoginPlaceholder()">
+                            <option value="employee">Faculty</option>
+                            <option value="hod">HOD</option>
+                            <option value="oa">Office Admin</option>
+                            <option value="student">Student</option>
+                        </select>
+                </div>
+                <div class="form-group">
+                    <label>User ID / Username</label>
+                    <input type="text" id="login-user" required placeholder="Enter ID">
+                </div>
+                <div class="form-group">
+                    <label>Password</label>
+                        <input type="password" id="login-pass" required placeholder="Enter password">
+                    </div>
+                <button type="submit" class="btn btn-primary">Login</button>
+                <span class="forgot-pass" onclick="openForgotModal()">Forgot Password?</span>
+            </form>
+            <div style="margin-top: 20px; font-size: 0.8rem; color: #666; background: #f9f9f9; padding: 10px; border-radius: 4px;">
+                <b>Demo IDs:</b><br>
+                Faculty: E14746, E19002, E19725, E12163, emp5 (pass: 123)<br>
+                HOD: hod1 (pass: 123)<br>
+                Student: stu1 to stu5 (pass: 123)
+            </div>
+        </div>
+    </div>
+
+    <!-- Dashboard View -->
+    <div id="dashboard-view">
+        <div class="d-container">
+            <aside class="sidebar" id="sidebar">
+                <div class="user-profile">
+                    <div class="user-avatar" id="sidebar-avatar"><i class="fas fa-user"></i></div>
+                    <h3 id="user-name-display">User</h3>
+                    <p id="user-role-display" class="text-sm" style="color: var(--accent);">Role</p>
+                </div>
+                <div id="menu-container"></div>
+            </aside>
+
+            <main class="main-content">
+                <div id="content-area"></div>
+            </main>
+        </div>
+    </div>
+
+    <!-- Modals -->
+    <!-- 1. WiFi Login Modal -->
+    <div id="wifi-modal" class="modal">
+        <div class="modal-content">
+            <h3><i class="fas fa-wifi"></i> Network Authentication</h3>
+            <p style="margin-bottom:20px; color:#666;">Please verify your campus credentials to mark attendance.</p>
+            <div class="form-group">
+                <label>Faculty ID</label>
+                <input type="text" id="wifi-id" placeholder="Enter ID">
+            </div>
+            <div class="form-group">
+                <label>Password</label>
+                <input type="password" id="wifi-pass" placeholder="Enter password">
+            </div>
+            <div class="modal-actions">
+                <button class="btn btn-danger" onclick="closeModal('wifi-modal')">Cancel</button>
+                <button class="btn btn-success" onclick="verifyWifiCredentials()">Connect</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 2. Camera/Selfie Modal -->
+    <div id="camera-modal" class="modal">
+        <div class="modal-content">
+            <h3>Mark Live Attendance</h3>
+            <p style="margin-bottom:10px; color:#666; font-size:0.9rem;">Position your face in the circle and click Capture.</p>
+            <div class="camera-view" id="camera-feed">
+                <div class="camera-overlay"></div>
+                <video id="live-video" autoplay playsinline muted></video>
+                <img id="captured-image" src="" alt="Captured">
+            </div>
+            <div class="modal-actions" id="camera-actions-start">
+                <button class="btn btn-danger" onclick="closeCameraModal()">Cancel</button>
+                <button class="btn btn-primary" id="btn-capture" onclick="captureSelfie()" disabled><i class="fas fa-camera"></i> Capture</button>
+            </div>
+            <div class="modal-actions" id="camera-actions-captured" style="display:none;">
+                <button class="btn btn-warning" onclick="retakeSelfie()"><i class="fas fa-redo"></i> Retake</button>
+                <button class="btn btn-success" onclick="confirmAttendance()"><i class="fas fa-check"></i> Mark Present</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 3. Leave Request Modal (UPDATED for Range & Times) -->
+    <div id="leave-modal" class="modal">
+        <div class="modal-content">
+            <h3>Request Leave</h3>
+            
+            <!-- Medical: Date Range -->
+            <div class="form-group" id="medical-date-group" style="display:none;">
+                <label>Start Date</label>
+                <input type="date" id="leave-start-date">
+                <label style="margin-top:10px;">End Date</label>
+                <input type="date" id="leave-end-date">
+            </div>
+
+            <!-- Single Date for others -->
+            <div class="form-group" id="single-date-group">
+                <label>Select Date</label>
+                <input type="date" id="leave-date" required>
+            </div>
+
+            <div class="form-group" id="time-slot-group" style="display:none;">
+                <label>Select Time Slot</label>
+                <select id="leave-time">
+                    <!-- Populated dynamically -->
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Reason</label>
+                <input type="text" id="leave-reason" placeholder="Enter reason (optional)">
+            </div>
+            <div class="modal-actions">
+                <button class="btn btn-danger" onclick="closeModal('leave-modal')">Cancel</button>
+                <button class="btn btn-success" onclick="submitLeaveRequest()">Submit Request</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 4. Add Student to Chat Modal -->
+    <div id="add-student-modal" class="modal">
+        <div class="modal-content">
+            <h3><i class="fas fa-user-plus"></i> Add Student to Group</h3>
+            <div class="form-group">
+                <label>Select Student</label>
+                <select id="add-student-select" class="modern-input-field" style="padding:10px; border-radius:6px; border:1px solid #ddd;">
+                    <!-- Populated by JS -->
+                </select>
+            </div>
+            <div class="modal-actions">
+                <button class="btn btn-danger" onclick="closeModal('add-student-modal')">Cancel</button>
+                <button class="btn btn-primary" onclick="confirmAddStudent()">Add</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Forgot Password Modal -->
+    <div id="forgot-modal" class="modal">
+        <div class="modal-content">
+            <h3>Reset Password</h3>
+            <div class="form-group">
+                <input type="text" id="forgot-user" placeholder="Enter your User ID">
+            </div>
+            <div class="form-group">
+                <input type="password" id="new-pass" placeholder="New Password">
+            </div>
+            <div class="modal-actions">
+                <button class="btn btn-danger" onclick="closeModal('forgot-modal')">Cancel</button>
+                <button class="btn btn-success" onclick="resetPassword()">Reset</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        /* ================= STATE & DATA GENERATION ================= */
+        
+        const getAvatar = (seed) => `https://picsum.photos/seed/${seed}/200/200`;
+
+        const generateUsers = () => {
+            let users = [];
+            // HOD & OA
+            users.push({ id: 200, name: "Dr. HOD Karan", username: "hod1", password: "123", role: "hod", college: "Chandigarh University", dept: "Engineering", uid: "HOD01", photo: getAvatar('hod1'), email: "hod1@cuchd.in", phone: "+91 98765 43210", location: "Admin Block", joinDate: "Jan 2020" });
+            users.push({ id: 300, name: "OA Preet", username: "oa1", password: "123", role: "oa", college: "Chandigarh University", dept: "Office", uid: "OA01", photo: getAvatar('oa1'), email: "oa1@cuchd.in", phone: "+91 98765 43211", location: "Office Block", joinDate: "Mar 2021" });
+            
+            // HARDCODED FACULTY
+            users.push({ 
+                id: 1, name: "Dr. Nancy Jyani", username: "E14746", password: "123", role: "employee",
+                college: "Chandigarh University", dept: "Management", uid: "E14746", block: "Block A",
+                photo: getAvatar('nancy'), email: "nancy.jyani@cuchd.in", phone: "+91 98765 43201", 
+                location: "Block A, Room 101", joinDate: "Jan 2020" 
+            });
+            users.push({ 
+                id: 2, name: "Dr. Niteesh Kumar", username: "E19002", password: "123", role: "employee",
+                college: "Chandigarh University", dept: "Computer Science", uid: "E19002", block: "Block B",
+                photo: getAvatar('niteesh'), email: "niteesh.kumar@cuchd.in", phone: "+91 98765 43202", 
+                location: "Block B, Room 202", joinDate: "Feb 2021" 
+            });
+            users.push({ 
+                id: 3, name: "Ms. Radhika", username: "E19725", password: "123", role: "employee",
+                college: "Chandigarh University", dept: "Law", uid: "E19725", block: "Block C",
+                photo: getAvatar('radhika'), email: "radhika@cuchd.in", phone: "+91 98765 43203", 
+                location: "Block C, Room 305", joinDate: "Mar 2022" 
+            });
+            users.push({ 
+                id: 4, name: "Ms. Navita", username: "E12163", password: "123", role: "employee",
+                college: "Chandigarh University", dept: "Engineering", uid: "E12163", block: "Block D",
+                photo: getAvatar('navita'), email: "navita@cuchd.in", phone: "+91 98765 43204", 
+                location: "Block D, Room 102", joinDate: "Jan 2023" 
+            });
+
+            const empNames = ["Dr. Arjun Singh", "Prof. Simran Kaur"];
+            for(let i=0; i<2; i++) {
+                users.push({
+                    id: 5 + i, 
+                    name: empNames[i], 
+                    username: `emp${5+i}`, 
+                    password: "123", 
+                    role: "employee",
+                    college: "Chandigarh University", 
+                    dept: "Computer Science",
+                    uid: `EMP${(5+i).toString().padStart(3, '0')}`, 
+                    block: ["Block E", "Block F"][i],
+                    photo: getAvatar(`emp${5+i}`),
+                    email: `emp${5+i}@cuchd.in`,
+                    phone: `+91 98765 432${10+i}`,
+                    location: `Block ${String.fromCharCode(69+5+i)}, Room ${10+i}`,
+                    joinDate: "Jan 2023"
+                });
+            }
+
+            // STUDENTS
+            const studentNames = ["Rahul Kumar", "Sneha Gupta", "Amit Verma", "Pooja Singh", "Rohan Das"];
+            for(let i=1; i<=5; i++) {
+                users.push({
+                    id: 100 + i, 
+                    name: studentNames[i-1], 
+                    username: `stu${i}`, 
+                    password: "123", 
+                    role: "student",
+                    college: "Chandigarh University", 
+                    dept: "Computer Science",
+                    uid: `STU${i.toString().padStart(3, '0')}`, 
+                    studentCode: `2023-CS-${i.toString().padStart(3,'0')}`,
+                    photo: getAvatar(`stu${i}`),
+                    allottedTeacherId: (i % 5) + 1,
+                    email: `stu${i}@cuchd.in`,
+                    gmail: `student${i}@gmail.com`,
+                    phone: `+91 99887 766${5+i}`,
+                    location: "Hostel A",
+                    joinDate: "Aug 2023",
+                    section: ["A", "B", "C"][i%3],
+                    fatherName: `Father ${i}`,
+                    otherName: `Mother ${i}`,
+                    cgpa: (8.0 + Math.random() * 1.9).toFixed(2)
+                });
+            }
+            return users;
+        };
+
+        const timetableSlots = [
+            "09:30 - 10:20", 
+            "10:20 - 11:10", 
+            "Short Break",
+            "11:20 - 12:10", 
+            "12:10 - 13:05", 
+            "13:05 - 13:55", 
+            "13:55 - 14:45", 
+            "14:45 - 15:35", 
+            "15:35 - 16:25"
+        ];
+
+        const timetableData = [
+            { userId: 1, day: "Monday", time: "09:30 - 10:20", subject: "Data Structures", courseCode: "CSE-201", block: "A Block", room: "Lab 101" },
+            { userId: 1, day: "Monday", time: "10:20 - 11:10", subject: "Algorithms", courseCode: "CSE-202", block: "B Block", room: "Room 205" },
+            { userId: 1, day: "Tuesday", time: "13:05 - 13:55", subject: "Web Dev", courseCode: "CSE-305", block: "A Block", room: "Lab A" },
+            { userId: 2, day: "Monday", time: "09:30 - 10:20", subject: "Physics", courseCode: "PHY-101", block: "C Block", room: "Lab 102" },
+            { userId: 2, day: "Wednesday", time: "11:20 - 12:10", subject: "Mechanics", courseCode: "ME-201", block: "C Block", room: "Hall 2" },
+        ];
+
+        let attendanceData = JSON.parse(localStorage.getItem('fms_attendance')) || [];
+        let studentUpdates = JSON.parse(localStorage.getItem('fms_student_updates')) || [];
+        let groupChatMessages = JSON.parse(localStorage.getItem('fms_chat')) || [
+             { id: 1, senderId: 1, senderName: "Dr. Nancy Jyani", text: "Welcome to the group! Please check the timetable.", time: "10:00 AM" }
+        ];
+
+        const notices = JSON.parse(localStorage.getItem('fms_notices')) || [
+            { id: 1, title: "Holiday Announcement", date: "Oct 25", content: "University will remain closed on account of Diwali." },
+            { id: 2, title: "Exam Schedule", date: "Oct 28", content: "Mid-term exams start from next Monday. Check portal." },
+            { id: 3, title: "Workshop", date: "Nov 02", content: "AI/ML Workshop at Block 5." }
+        ];
+
+        let availableClasses = JSON.parse(localStorage.getItem('fms_classes')) || ["CSE-A (Section 1)", "CSE-B (Section 2)", "ME-A (Section 1)", "ME-B (Section 2)", "Common (All)"];
+
+        let state = {
+            users: generateUsers(),
+            currentUser: null,
+            adjustments: JSON.parse(localStorage.getItem('fms_adjustments')) || [],
+            messages: JSON.parse(localStorage.getItem('fms_messages')) || [],
+            courses: JSON.parse(localStorage.getItem('fms_courses')) || [],
+            studentUpdates: studentUpdates,
+            groupChat: groupChatMessages
+        };
+
+        let currentMsgTab = 'inbox'; 
+        let currentLeaveType = '';
+        let wifiConnected = false; 
+        let editingUpdateId = null; 
+        let viewTimetableForUserId = null;
+
+        function saveState() {
+            localStorage.setItem('fms_adjustments', JSON.stringify(state.adjustments));
+            localStorage.setItem('fms_messages', JSON.stringify(state.messages));
+            localStorage.setItem('fms_courses', JSON.stringify(state.courses));
+            localStorage.setItem('fms_users', JSON.stringify(state.users)); 
+            localStorage.setItem('fms_timetable', JSON.stringify(timetableData));
+            localStorage.setItem('fms_attendance', JSON.stringify(attendanceData));
+            localStorage.setItem('fms_student_updates', JSON.stringify(state.studentUpdates));
+            localStorage.setItem('fms_chat', JSON.stringify(state.groupChat));
+            localStorage.setItem('fms_notices', JSON.stringify(notices));
+            localStorage.setItem('fms_classes', JSON.stringify(availableClasses));
+        }
+
+        /* ================= AUDIO NOTIFICATION ================= */
+        function playNotificationSound() {
+            try {
+                const ctx = new (window.AudioContext || window.webkitAudioContext)();
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(440, ctx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(880, ctx.currentTime + 0.1);
+                gain.gain.setValueAtTime(0.1, ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.5);
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+                osc.start();
+                osc.stop(ctx.currentTime + 0.5);
+            } catch (e) { console.log("Audio not supported"); }
+        }
+
+        /* ================= AUTHENTICATION ================= */
+        const authView = document.getElementById('auth-view');
+        const dashboardView = document.getElementById('dashboard-view');
+        const loginForm = document.getElementById('login-form');
+
+        loginForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const role = document.getElementById('login-role').value;
+            const user = document.getElementById('login-user').value;
+            const pass = document.getElementById('login-pass').value;
+            const account = state.users.find(u => (u.username === user || u.uid === user) && u.password === pass && u.role === role);
+            if(account) login(account);
+            else showToast("Invalid ID, Password, or Role!");
+        });
+
+        function updateLoginPlaceholder() {
+            const role = document.getElementById('login-role').value;
+            const input = document.getElementById('login-user');
+            if(role === 'employee') input.placeholder = "e.g., E14746 or emp5";
+            else if(role === 'hod') input.placeholder = "e.g., hod1";
+            else if(role === 'oa') input.placeholder = "e.g., oa1";
+            else if(role === 'student') input.placeholder = "e.g., stu1";
+        }
+
+        function login(user) {
+            state.currentUser = user;
+            authView.style.display = 'none';
+            dashboardView.style.display = 'flex';
+            document.getElementById('nav-college-name').innerText = user.college;
+            document.getElementById('user-name-display').innerText = user.name;
+            document.getElementById('user-role-display').innerText = user.role.toUpperCase();
+            
+            // UPDATED: Sync Photo to Sidebar immediately
+            updateSidebarAvatar(user.photo);
+            
+            cleanOldData();
+            
+            let unreadCount = 0;
+            if(user.role === 'student') {
+                unreadCount = state.studentUpdates.filter(u => !u.read).length;
+            } else {
+                unreadCount = state.messages.filter(m => m.toId === user.id && !m.read).length;
+                unreadCount += state.adjustments.filter(a => a.toId === user.id && a.status === 'Pending').length;
+            }
+
+            if(unreadCount > 0) setTimeout(() => playNotificationSound(), 1000);
+            
+            setupSidebar();
+            loadSection('dashboard');
+            showToast(`Welcome, ${user.name}`);
+        }
+
+        function updateSidebarAvatar(photoUrl) {
+            const avatar = document.getElementById('sidebar-avatar');
+            if(photoUrl) { avatar.style.backgroundImage = `url(${photoUrl})`; avatar.innerHTML = ""; }
+            else { avatar.style.backgroundImage = 'none'; avatar.innerHTML = '<i class="fas fa-user"></i>'; }
+        }
+
+        function logout() {
+            state.currentUser = null; authView.style.display = 'flex'; dashboardView.style.display = 'none'; document.getElementById('login-form').reset();
+            wifiConnected = false;
+        }
+        
+        function openForgotModal() { document.getElementById('forgot-modal').style.display = 'flex'; }
+        
+        function resetPassword() {
+            const uid = document.getElementById('forgot-user').value;
+            const newP = document.getElementById('new-pass').value;
+            const user = state.users.find(u => u.username === uid || u.uid === uid);
+            if(user && newP) { user.password = newP; saveState(); showToast("Password Reset!"); closeModal('forgot-modal'); }
+            else showToast("User not found.");
+        }
+        
+        function closeModal(id) { document.getElementById(id).style.display = 'none'; }
+
+        /* ================= AUTO-DELETION LOGIC ================= */
+        function cleanOldData() {
+            const now = Date.now();
+            const oneDayMs = 24 * 60 * 60 * 1000;
+            const twoDaysMs = 48 * 60 * 60 * 1000;
+
+            const initialAdjCount = state.adjustments.length;
+            state.adjustments = state.adjustments.filter(a => {
+                if(!a.timestamp) return true;
+                return (now - new Date(a.timestamp).getTime()) <= oneDayMs;
+            });
+            if(state.adjustments.length < initialAdjCount) saveState();
+
+            const initialMsgCount = state.messages.length;
+            state.messages = state.messages.filter(m => {
+                if(!m.timestamp) return true;
+                return (now - new Date(m.timestamp).getTime()) <= twoDaysMs;
+            });
+            if(state.messages.length < initialMsgCount) saveState();
+        }
+
+        /* ================= DROPDOWNS ================= */
+        function toggleDropdown(id) {
+            const allDropdowns = document.querySelectorAll('.dropdown-menu');
+            allDropdowns.forEach(d => { if(d.id !== id) d.style.display = 'none'; });
+            const dd = document.getElementById(id);
+            dd.style.display = dd.style.display === 'block' ? 'none' : 'block';
+            if(id === 'notif-dropdown' && dd.style.display === 'block') renderNotificationList();
+        }
+
+        function closeAllDropdowns() {
+            document.querySelectorAll('.dropdown-menu').forEach(d => d.style.display = 'none');
+        }
+
+        window.onclick = function(event) {
+            if (!event.target.closest('.dropdown-wrapper')) { closeAllDropdowns(); }
+        }
+
+        function updateNotificationCount() {
+            const user = state.currentUser;
+            if(!user) return;
+            let count = 0;
+            if(user.role === 'student') {
+                 count = state.studentUpdates.filter(u => !u.read).length + state.groupChat.filter(m => m.senderId !== user.id).length;
+            } else {
+                 count += state.messages.filter(m => m.toId === user.id && !m.read).length;
+                 count += state.adjustments.filter(a => a.toId === user.id && a.status === 'Pending').length;
+            }
+            
+            const badge = document.getElementById('notif-count');
+            badge.innerText = count;
+            badge.style.display = count > 0 ? 'inline-block' : 'none';
+        }
+
+        function renderNotificationList() {
+            const user = state.currentUser;
+            const list = document.getElementById('notif-list-dropdown');
+            list.innerHTML = '';
+            
+            if (user.role === 'student') {
+                const updates = state.studentUpdates.filter(u => !u.read).slice(0, 5);
+                updates.forEach(u => {
+                    const teacher = state.users.find(usr => usr.id === u.teacherId);
+                    list.innerHTML += `<a class="dropdown-item" onclick="loadSection('student-updates'); closeAllDropdowns();"><i class="fas fa-book" style="color:var(--accent)"></i> Class Update: ${u.title} from ${teacher ? teacher.name : 'Teacher'}</a>`;
+                });
+            } else {
+                const msgs = state.messages.filter(m => m.toId === user.id && !m.read).slice(0, 3);
+                msgs.forEach(m => {
+                    const fromUser = state.users.find(u => u.id === m.fromId);
+                    list.innerHTML += `<a class="dropdown-item" onclick="loadSection('messages'); closeAllDropdowns();"><i class="fas fa-envelope" style="color:var(--accent)"></i> Msg: ${m.subject} from ${fromUser ? fromUser.name : 'System'}</a>`;
+                });
+            }
+            
+            if(list.innerHTML === '') {
+                list.innerHTML = '<a class="dropdown-item" style="color:grey; cursor:default;">No new notifications</a>';
+            }
+        }
+
+        /* ================= ROUTING & SIDEBAR ================= */
+        const menuContainer = document.getElementById('menu-container');
+        const contentArea = document.getElementById('content-area');
+
+        function setupSidebar() {
+            const role = state.currentUser.role;
+            let items = [];
+            
+            if (role === 'student') {
+                items = [
+                    { id: 'dashboard', icon: 'fa-tachometer-alt', label: 'Dashboard' },
+                    { id: 'timetable', icon: 'fa-calendar-alt', label: 'Timetable' },
+                    { id: 'messages', icon: 'fa-comments', label: 'Group Chat' },
+                    { id: 'student-updates', icon: 'fa-bell', label: 'Daily Updates' },
+                    { id: 'profile', icon: 'fa-id-card', label: 'My Profile' }
+                ];
+            } else {
+                items = [
+                    { id: 'dashboard', icon: 'fa-tachometer-alt', label: 'Dashboard' },
+                    { id: 'attendance', icon: 'fa-calendar-check', label: 'My Attendance' },
+                    { id: 'timetable', icon: 'fa-calendar-alt', label: 'Timetable' },
+                    { id: 'adjustments', icon: 'fa-exchange-alt', label: 'Adjustments' },
+                    { id: 'messages', icon: 'fa-envelope', label: 'Messages' },
+                    { id: 'class-update', icon: 'fa-chalkboard-teacher', label: 'Class Update' }, 
+                    { id: 'profile', icon: 'fa-id-card', label: 'My Profile' }
+                ];
+            } 
+            
+            menuContainer.innerHTML = items.map(item => `<div class="menu-item" onclick="loadSection('${item.id}', this)"><i class="fas ${item.icon}"></i> ${item.label}</div>`).join('');
+            if(menuContainer.children[0]) menuContainer.children[0].classList.add('active');
+        }
+
+        function loadSection(sectionId, el) {
+            if(el) { document.querySelectorAll('.menu-item').forEach(i => i.classList.remove('active')); el.classList.add('active'); }
+            switch(sectionId) {
+                case 'dashboard': renderDashboard(); break;
+                case 'attendance': renderAttendanceView(); break;
+                case 'timetable': renderTimetable(); break;
+                case 'adjustments': renderAdjustments(); break;
+                case 'messages': renderMessages(); break;
+                case 'class-update': renderClassUpdate(); break;
+                case 'student-updates': renderStudentUpdates(); break; 
+                case 'profile': renderProfile(); break;
+                default: contentArea.innerHTML = `<h2>Section Under Construction</h2>`;
+            }
+        }
+
+        /* ================= RENDERERS ================= */
+        
+        function renderDashboard() {
+            const user = state.currentUser;
+            
+            if(user.role === 'student') {
+                renderStudentDashboard();
+                return;
+            }
+
+            const pendingAdjs = state.adjustments.filter(a => a.toId === user.id && a.status === 'Pending').length;
+            const alerts = state.messages.filter(m => m.toId === user.id && !m.read).length;
+            const updates = state.courses.filter(c => c.userId === user.id).length; 
+
+            let noticeFormHTML = '';
+            if(user.role === 'hod' || user.role === 'oa') {
+                noticeFormHTML = `
+                    <div style="margin-bottom:20px; background:#f0fdf4; padding:15px; border-radius:8px; border:1px solid #bbf7d0;">
+                        <h4 style="margin-bottom:10px; color:var(--success);">Post New Notice</h4>
+                        <form onsubmit="postNewNotice(event)" style="display:flex; gap:10px; align-items:flex-end; flex-wrap:wrap;">
+                            <div style="flex:1;"><input type="text" id="notice-title" class="msg-input" placeholder="Notice Title" required></div>
+                            <div style="flex:1;"><input type="date" id="notice-date" class="msg-input" required></div>
+                            <div style="flex:2;"><input type="text" id="notice-content" class="msg-input" placeholder="Notice Content" required></div>
+                            <div style="flex:0 0 200px;">
+                                <label style="font-size:0.8rem; color:#666;">Attach File (PDF/IMG)</label>
+                                <input type="file" id="notice-file" accept=".pdf,.jpg,.jpeg,.png" class="msg-input">
+                            </div>
+                            <button type="submit" class="btn btn-success btn-sm">Post</button>
+                        </form>
+                    </div>
+                `;
+            }
+
+            contentArea.innerHTML = `
+                <h2 class="header-title">Dashboard</h2>
+                ${noticeFormHTML}
+                <div class="dashboard-grid">
+                    <div>
+                        <div class="stat-cards" style="margin-bottom:20px;">
+                            <div class="stat-card" onclick="loadSection('adjustments')"><h3>${pendingAdjs}</h3><p>Pending Requests</p></div>
+                            <div class="stat-card" onclick="loadSection('messages')"><h3>${alerts}</h3><p>New Alerts</p></div>
+                            <div class="stat-card" onclick="loadSection('class-update')"><h3>${updates}</h3><p>Class Updates</p></div>
+                        </div>
+                        
+                        <div class="card" style="min-height: 250px;">
+                            <h3 style="margin-bottom:15px; color:var(--primary); border-bottom:2px solid #f0f0f0; padding-bottom:10px;">Notice Board</h3>
+                            ${notices.map(n => `
+                                <div style="padding:10px 0; border-bottom:1px solid #eee;">
+                                    <div style="font-weight:bold; color:var(--accent);">${n.title} <span style="float:right; font-weight:normal; font-size:0.8rem; background:#eee; padding:2px 6px; border-radius:4px;">${n.date}</span> ${n.file ? '<i class="fas fa-paperclip" title="Attachment"></i>' : ''}</div>
+                                    <div style="font-size:0.9rem; color:#555; margin-top:5px;">${n.content}</div>
+                                    ${n.file ? `<div style="margin-top:5px;"><a href="${n.fileUrl}" target="_blank" style="color:var(--primary); font-size:0.8rem; text-decoration:underline;">Download Attachment</a></div>` : ''}
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+
+                    <!-- CALENDAR WIDGET (Dashboard) -->
+                    <div class="calendar-widget">
+                        <div class="calendar-header">
+                            <h4><i class="fas fa-calendar-alt"></i> Monthly Attendance</h4>
+                            <input type="month" id="dash-cal-month" onchange="renderDashboardCalendar(this.value)" style="border:1px solid #ddd; border-radius:4px; padding:2px;">
+                        </div>
+                        <div class="calendar-grid" id="dash-cal-grid">
+                            <!-- JS Populated -->
+                        </div>
+                        <div style="margin-top:10px; display:flex; gap:10px; font-size:0.75rem; justify-content:center; flex-wrap:wrap;">
+                            <span style="display:flex; align-items:center; gap:5px;"><div style="width:10px; height:10px; background:#dcfce7; border:none;"></div> Present</span>
+                            <span style="display:flex; align-items:center; gap:5px;"><div style="width:10px; height:10px; background:#fee2e2; border:none;"></div> Absent</span>
+                            <span style="display:flex; align-items:center; gap:5px;"><div style="width:10px; height:10px; background:#fef3c7; border:none;"></div> Short/Lv</span>
+                            <span style="display:flex; align-items:center; gap:5px;"><div style="width:10px; height:10px; background:#dbeafe; border:none;"></div> Medical</span>
+                            <span style="display:flex; align-items:center; gap:5px;"><div style="width:10px; height:10px; background:#f3e8ff; border:none;"></div> Half</span>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            const todayStr = new Date().toISOString().split('T')[0];
+            document.getElementById('dash-cal-month').value = todayStr.substring(0, 7);
+            renderDashboardCalendar(todayStr.substring(0, 7));
+        }
+
+        function postNewNotice(e) {
+            e.preventDefault();
+            const title = document.getElementById('notice-title').value;
+            const date = document.getElementById('notice-date').value;
+            const content = document.getElementById('notice-content').value;
+            const fileInput = document.getElementById('notice-file');
+            let fileUrl = null;
+
+            if(fileInput.files && fileInput.files[0]) {
+                fileUrl = URL.createObjectURL(fileInput.files[0]);
+            }
+
+            const newNotice = {
+                id: Date.now(),
+                title, date, content,
+                file: fileInput.files[0] ? fileInput.files[0].name : null,
+                fileUrl: fileUrl
+            };
+            
+            notices.unshift(newNotice);
+            saveState();
+            showToast("Notice Posted!");
+            document.getElementById('notice-title').parentElement.reset();
+            renderDashboard();
+        }
+
+        function renderDashboardCalendar(yearMonth) {
+            const container = document.getElementById('dash-cal-grid');
+            if(!container) return;
+            container.innerHTML = '';
+            
+            ['S','M','T','W','T','F','S'].forEach(d => container.innerHTML += `<div class="cal-day-name">${d}</div>`);
+
+            const [year, month] = yearMonth.split('-');
+            const daysInMonth = new Date(year, month, 0).getDate();
+            const firstDayIndex = new Date(year, month - 1, 1).getDay();
+            const todayStr = new Date().toISOString().split('T')[0];
+
+            for(let i=0; i<firstDayIndex; i++) container.innerHTML += `<div class="cal-day empty"></div>`;
+
+            for(let d=1; d<=daysInMonth; d++) {
+                const dateStr = `${year}-${month}-${d.toString().padStart(2, '0')}`;
+                const record = attendanceData.find(a => a.userId === state.currentUser.id && a.date === dateStr);
+                
+                let cls = '';
+                let content = d; 
+
+                if (record) {
+                    if(record.status === 'Present') cls = 'status-present';
+                    else if(record.status === 'Absent') cls = 'status-absent';
+                    else if(record.status === 'Short Leave') { cls = 'status-short'; }
+                    else if(record.status === 'Medical Leave') { cls = 'status-medical'; }
+                    else if(record.status === 'Half Day') { cls = 'status-halfday'; }
+                }
+                
+                const isToday = (dateStr === todayStr) ? 'today' : '';
+                container.innerHTML += `<div class="cal-day ${cls} ${isToday}">${content}</div>`;
+            }
+        }
+
+        /* --- STUDENT DASHBOARD --- */
+        function renderStudentDashboard() {
+            const user = state.currentUser;
+            const teacher = state.users.find(u => u.id === user.allottedTeacherId);
+            
+            contentArea.innerHTML = `
+                <h2 class="header-title">Student Dashboard</h2>
+                <div class="student-dashboard-grid">
+                    <div class="sd-card">
+                        <h3>${teacher ? teacher.name : 'N/A'}</h3>
+                        <p>Class Teacher</p>
+                    </div>
+                    <div class="sd-card">
+                        <h3>${state.studentUpdates.length}</h3>
+                        <p>Daily Updates</p>
+                    </div>
+                    <div class="sd-card">
+                        <h3>${attendanceData.filter(a => a.userId === user.id && a.status === 'Present').length}</h3>
+                        <p>Days Present</p>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3><i class="fas fa-bullhorn"></i> Recent Announcements</h3>
+                    ${notices.map(n => `
+                        <div style="padding:10px 0; border-bottom:1px solid #eee;">
+                            <div style="font-weight:bold; color:var(--primary);">${n.title} <span style="float:right; font-size:0.8rem; color:#888;">${n.date}</span></div>
+                            <div style="font-size:0.9rem; margin-top:5px;">${n.content}</div>
+                            ${n.file ? `<div style="margin-top:5px;"><a href="${n.fileUrl}" target="_blank" style="color:var(--primary); font-size:0.8rem; text-decoration:underline;"><i class="fas fa-paperclip"></i> Download</a></div>` : ''}
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+        }
+
+        /* --- ATTENDANCE SECTION (UPDATED) --- */
+        let localStream = null;
+
+        function renderAttendanceView() {
+            const user = state.currentUser;
+            const todayStr = new Date().toISOString().split('T')[0];
+            const todayRecord = attendanceData.find(a => a.userId === user.id && a.date === todayStr);
+            const isRecorded = !!todayRecord; 
+
+            const dateOptions = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+            const currentDateDisplay = new Date().toLocaleDateString('en-US', dateOptions);
+
+            let actionAreaHTML = '';
+            
+            if (!wifiConnected) {
+                actionAreaHTML = `
+                    <button class="wifi-btn" id="wifi-connect-btn" onclick="openWifiModal()" ${isRecorded ? 'disabled' : ''}>
+                        <i class="fas fa-wifi"></i> ${isRecorded ? 'Attendance Marked' : 'Connect to CU-Guest'}
+                    </button>
+                    ${isRecorded ? '<div style="margin-top:10px; font-weight:bold; color:var(--success);">Attendance already recorded for today.</div>' : '<div style="margin-top:15px; font-size:0.9rem; color:#666;">You must be connected to the campus network to mark attendance.</div>'}
+                `;
+            } else {
+                actionAreaHTML = `
+                    <div style="margin-bottom:15px; color:var(--success); font-weight:bold;"><i class="fas fa-check-circle"></i> Connected to CU-Guest</div>
+                    <button class="selfie-btn" onclick="openCameraModal()" ${isRecorded ? 'disabled' : ''}>
+                        <i class="fas fa-camera"></i> ${isRecorded ? 'Marked Today' : 'Mark Present'}
+                    </button>
+                    ${isRecorded ? '<div style="margin-top:10px; font-weight:bold; color:var(--success);">You have already marked attendance or applied for leave today.</div>' : ''}
+                `;
+            }
+
+            contentArea.innerHTML = `
+                <h2 class="header-title">My Attendance</h2>
+                <div class="attendance-split-layout">
+                    <div class="att-left-panel">
+                        <div class="att-action-card">
+                            <div class="att-header-prof">
+                                <h2>Mark Attendance</h2>
+                                <p>${currentDateDisplay}</p>
+                            </div>
+                            <div style="margin-bottom: 30px;">${actionAreaHTML}</div>
+                            <div style="border-top: 1px solid #eee; padding-top: 20px; width: 100%;">
+                                <h4 style="margin-bottom:15px; color:var(--secondary);">Applying for Leave?</h4>
+                                <div class="leave-options-grid">
+                                    <button class="leave-btn short" onclick="openLeaveModal('Short Leave')" ${isRecorded ? 'disabled' : ''}><i class="fas fa-clock"></i> Short Leave</button>
+                                    <button class="leave-btn medical" onclick="openLeaveModal('Medical Leave')" ${isRecorded ? 'disabled' : ''}><i class="fas fa-briefcase-medical"></i> Medical</button>
+                                    <button class="leave-btn half" onclick="openLeaveModal('Half Day')" ${isRecorded ? 'disabled' : ''}><i class="fas fa-hourglass-half"></i> Half Day</button>
+                                </div>
+                            </div>
+                            <div class="disclaimer-box">
+                                <i class="fas fa-exclamation-triangle"></i>
+                                <span><strong>Important:</strong> It is mandatory to mark attendance before 9:30 AM, otherwise half-day will be marked automatically.</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="att-right-panel">
+                        <div class="attendance-wrapper">
+                            <div class="calendar-header">
+                                <h3 style="margin:0; color:var(--primary); font-size:1.3rem;">Attendance Log</h3>
+                                <input type="month" id="att-cal-month" value="${todayStr.substring(0, 7)}" onchange="renderAttendanceCalendar(this.value)" style="border:1px solid #ddd; border-radius:4px; padding:5px;">
+                            </div>
+                            <div id="att-cal-grid" class="attendance-calendar-grid"></div>
+                            <div style="margin-top:15px; display:flex; gap:20px; font-size:0.9rem; justify-content:center; padding-top:10px; border-top:1px solid #eee; flex-wrap:wrap;">
+                                <span style="display:flex; align-items:center; gap:8px;"><div style="width:20px; height:20px; background:#dcfce7; border-radius:4px;"></div> Present</span>
+                                <span style="display:flex; align-items:center; gap:8px;"><div style="width:20px; height:20px; background:#fee2e2; border-radius:4px;"></div> Absent</span>
+                                <span style="display:flex; align-items:center; gap:8px;"><div style="width:20px; height:20px; background:#f8f9fa; border:1px solid #eee; border-radius:4px;"></div> No Data</span>
+                                <span style="display:flex; align-items:center; gap:8px;"><div style="width:20px; height:20px; background:#fef3c7; border-radius:4px;"></div> Short/Lv</span>
+                                <span style="display:flex; align-items:center; gap:8px;"><div style="width:20px; height:20px; background:#dbeafe; border-radius:4px;"></div> Medical</span>
+                                <span style="display:flex; align-items:center; gap:8px;"><div style="width:20px; height:20px; background:#f3e8ff; border-radius:4px;"></div> Half</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            setTimeout(() => renderAttendanceCalendar(todayStr.substring(0, 7)), 100);
+        }
+
+        // New WiFi Modal Logic
+        function openWifiModal() {
+            document.getElementById('wifi-modal').style.display = 'flex';
+            document.getElementById('wifi-id').value = '';
+            document.getElementById('wifi-pass').value = '';
+        }
+
+        function verifyWifiCredentials() {
+            const id = document.getElementById('wifi-id').value;
+            const pass = document.getElementById('wifi-pass').value;
+            const validUser = state.users.find(u => u.role === 'employee' && (u.username === id || u.uid === id) && u.password === pass);
+
+            if(validUser) {
+                wifiConnected = true;
+                closeModal('wifi-modal');
+                showToast("Connected to CU-Guest Successfully!");
+                renderAttendanceView();
+            } else {
+                showToast("Invalid Campus ID or Password");
+            }
+        }
+
+        function renderAttendanceCalendar(yearMonth) {
+            const container = document.getElementById('att-cal-grid');
+            if(!container) return;
+            container.innerHTML = '';
+            
+            const [year, month] = yearMonth.split('-');
+            const daysInMonth = new Date(year, month, 0).getDate();
+            const firstDayIndex = new Date(year, month - 1, 1).getDay();
+            const todayStr = new Date().toISOString().split('T')[0];
+
+            const days = ['S','M','T','W','T','F','S'];
+            days.forEach(d => container.innerHTML += `<div style="text-align:center; font-weight:bold; color:#888;">${d}</div>`);
+
+            for(let i=0; i<firstDayIndex; i++) container.innerHTML += `<div></div>`;
+
+            for(let d=1; d<=daysInMonth; d++) {
+                const dateStr = `${year}-${month}-${d.toString().padStart(2, '0')}`;
+                const record = attendanceData.find(a => a.userId === state.currentUser.id && a.date === dateStr);
+                let statusClass = 'status-none';
+                let content = `<span>${d}</span>`;
+                
+                if (record) {
+                    if(record.status === 'Present') { statusClass = 'status-present'; }
+                    else if(record.status === 'Absent') { statusClass = 'status-absent'; }
+                    else if(record.status === 'Short Leave') { statusClass = 'status-short'; }
+                    else if(record.status === 'Medical Leave') { statusClass = 'status-medical'; }
+                    else if(record.status === 'Half Day') { statusClass = 'status-halfday'; }
+                }
+
+                const isToday = (dateStr === todayStr) ? 'today' : '';
+                
+                container.innerHTML += `
+                    <div class="cal-cell ${statusClass} ${isToday}" title="${dateStr}: ${record ? record.status : 'No Data'}">
+                        ${content}
+                    </div>
+                `;
+            }
+        }
+
+        /* --- LEAVE REQUEST LOGIC (UPDATED: Range & Times) --- */
+        function openLeaveModal(type) {
+            const todayStr = new Date().toISOString().split('T')[0];
+            const exists = attendanceData.find(a => a.userId === state.currentUser.id && a.date === todayStr);
+            if(exists) {
+                showToast("Attendance already recorded for today. Cannot apply leave.");
+                return;
+            }
+
+            currentLeaveType = type;
+            document.getElementById('leave-modal').style.display = 'flex';
+            document.getElementById('leave-reason').value = '';
+            
+            // Show/Hide Date Inputs
+            const singleDateGroup = document.getElementById('single-date-group');
+            const medicalDateGroup = document.getElementById('medical-date-group');
+            const timeGroup = document.getElementById('time-slot-group');
+            const timeSelect = document.getElementById('leave-time');
+
+            if (type === 'Medical Leave') {
+                singleDateGroup.style.display = 'none';
+                medicalDateGroup.style.display = 'block';
+                document.getElementById('leave-start-date').value = todayStr;
+                document.getElementById('leave-end-date').value = todayStr;
+                timeGroup.style.display = 'none';
+            } else {
+                singleDateGroup.style.display = 'block';
+                medicalDateGroup.style.display = 'none';
+                document.getElementById('leave-date').value = todayStr;
+                
+                if (type === 'Short Leave') {
+                    timeGroup.style.display = 'block';
+                    // REMOVED 11.20 option as requested
+                    timeSelect.innerHTML = `<option value="">Select Time</option>` + 
+                                            `<option value="09:30 - 11:10">09:30 - 11:10</option>` +
+                                            `<option value="02:40 - 04:30">02:40 - 04:30</option>`;
+                } else if (type === 'Half Day') {
+                    timeGroup.style.display = 'block';
+                    // Specific times requested
+                    timeSelect.innerHTML = `<option value="">Select Time</option>` +
+                                            `<option value="09:30 - 12:10">09:30 - 12:10</option>` +
+                                            `<option value="02:45 - 04:25">02:45 - 04:25</option>`;
+                } else {
+                    timeGroup.style.display = 'none';
+                }
+            }
+        }
+
+        function submitLeaveRequest() {
+            let dates = [];
+            let reason = document.getElementById('leave-reason').value;
+            let timeSlot = "Full Day";
+
+            if (currentLeaveType === 'Medical Leave') {
+                const start = document.getElementById('leave-start-date').value;
+                const end = document.getElementById('leave-end-date').value;
+                if(!start || !end) return showToast("Please select date range.");
+
+                // Generate dates
+                let curr = new Date(start);
+                let last = new Date(end);
+                while (curr <= last) {
+                    dates.push(curr.toISOString().split('T')[0]);
+                    curr.setDate(curr.getDate() + 1);
+                }
+                timeSlot = "Full Day";
+            } else {
+                const date = document.getElementById('leave-date').value;
+                if(!date) return showToast("Please select a date.");
+                dates.push(date);
+
+                if (currentLeaveType === 'Short Leave' || currentLeaveType === 'Half Day') {
+                    const selectedTime = document.getElementById('leave-time').value;
+                    if(!selectedTime) return showToast("Please select a time slot.");
+                    timeSlot = selectedTime;
+                }
+            }
+
+            // Add records for all dates
+            let addedCount = 0;
+            dates.forEach(dateStr => {
+                 // Remove any existing record for that day
+                attendanceData = attendanceData.filter(a => !(a.userId === state.currentUser.id && a.date === dateStr));
+                attendanceData.push({ 
+                    userId: state.currentUser.id, 
+                    date: dateStr, 
+                    status: currentLeaveType, 
+                    timeSlot: timeSlot,
+                    reason: reason,
+                    timestamp: new Date().toISOString() 
+                });
+                addedCount++;
+            });
+
+            // Notify others
+            state.users.filter(u => u.role === 'employee' && u.id !== state.currentUser.id).forEach(emp => {
+                state.messages.push({
+                    id: Date.now() + Math.random(),
+                    fromId: 0,
+                    toId: emp.id,
+                    subject: "Leave Notification",
+                    content: `${state.currentUser.name} has applied for ${currentLeaveType} (${addedCount} days).`,
+                    date: new Date().toLocaleString(),
+                    read: false,
+                    timestamp: new Date().toISOString()
+                });
+            });
+
+            saveState();
+            updateNotificationCount();
+            showToast(`${currentLeaveType} marked for ${addedCount} day(s).`);
+            closeModal('leave-modal');
+            renderAttendanceView();
+        }
+
+        async function startCamera() {
+            const videoEl = document.getElementById('live-video');
+            const captureBtn = document.getElementById('btn-capture');
+            try {
+                localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
+                videoEl.srcObject = localStream;
+                videoEl.style.display = 'block';
+                captureBtn.disabled = false;
+            } catch (err) {
+                showToast("Camera access denied. Using Simulation Mode.");
+                document.getElementById('camera-icon').style.display = 'block';
+                captureBtn.disabled = false;
+            }
+        }
+
+        function openCameraModal() {
+            document.getElementById('camera-modal').style.display = 'flex';
+            document.getElementById('camera-actions-start').style.display = 'flex';
+            document.getElementById('camera-actions-captured').style.display = 'none';
+            document.getElementById('captured-image').style.display = 'none';
+            document.getElementById('live-video').style.display = 'none';
+            startCamera();
+        }
+
+        function closeCameraModal() {
+            if (localStream) {
+                localStream.getTracks().forEach(track => track.stop());
+                localStream = null;
+            }
+            closeModal('camera-modal');
+        }
+
+        function captureSelfie() {
+            const videoEl = document.getElementById('live-video');
+            const img = document.getElementById('captured-image');
+            if (localStream) {
+                const canvas = document.createElement('canvas');
+                canvas.width = videoEl.videoWidth;
+                canvas.height = videoEl.videoHeight;
+                const ctx = canvas.getContext('2d');
+                ctx.translate(canvas.width, 0);
+                ctx.scale(-1, 1); 
+                ctx.drawImage(videoEl, 0, 0);
+                img.src = canvas.toDataURL('image/png');
+                videoEl.style.display = 'none';
+                localStream.getTracks().forEach(track => track.stop());
+                localStream = null;
+            } else {
+                img.src = getAvatar('selfie' + Date.now());
+            }
+            img.style.display = 'block';
+            document.getElementById('camera-actions-start').style.display = 'none';
+            document.getElementById('camera-actions-captured').style.display = 'flex';
+        }
+
+        function retakeSelfie() {
+            document.getElementById('captured-image').style.display = 'none';
+            document.getElementById('camera-actions-start').style.display = 'flex';
+            document.getElementById('camera-actions-captured').style.display = 'none';
+            startCamera();
+        }
+
+        function confirmAttendance() {
+            const todayStr = new Date().toISOString().split('T')[0];
+            attendanceData = attendanceData.filter(a => !(a.userId === state.currentUser.id && a.date === todayStr));
+            attendanceData.push({ userId: state.currentUser.id, date: todayStr, status: 'Present', timestamp: new Date().toISOString() });
+            saveState();
+            showToast("Attendance Marked Successfully!");
+            closeCameraModal();
+            renderAttendanceView();
+        }
+
+        /* --- ADJUSTMENTS --- */
+        function renderAdjustments() {
+            const user = state.currentUser;
+            const myRequests = state.adjustments.filter(a => a.fromId === user.id);
+            const incomingRequests = state.adjustments.filter(a => a.toId === user.id);
+
+            const renderIncomingRow = (a) => {
+                const sender = state.users.find(u => u.id === a.fromId);
+                const senderInfo = sender ? `${sender.name} (${sender.uid})` : 'Unknown User';
+                const senderPhoto = sender ? sender.photo : getAvatar('unknown');
+                
+                let actions = '';
+                if(a.status === 'Pending') {
+                    actions = `<button class="action-btn btn-approve" onclick="processAdjustment(${a.id}, 'Approved')"><i class="fas fa-check"></i></button><button class="action-btn btn-reject" onclick="processAdjustment(${a.id}, 'Rejected')"><i class="fas fa-times"></i></button>`;
+                }
+                return `
+                    <tr>
+                        <td>${a.date}</td>
+                        <td>${a.timeSlot}</td>
+                        <td style="text-align:center;">
+                            <img src="${senderPhoto}" class="adj-photo-cell">
+                            <div style="font-weight:bold; color:var(--primary); font-size:0.8rem;">${senderInfo}</div>
+                        </td>
+                        <td>${a.reason}</td>
+                        <td><span class="status-badge badge-${a.status.toLowerCase()}">${a.status}</span></td>
+                        <td>${actions}</td>
+                    </tr>`;
+            };
+
+            const renderMyRequestRow = (a) => {
+                const assignedUser = state.users.find(u => u.id === a.toId);
+                const assigneeInfo = assignedUser ? `${assignedUser.name} (${assignedUser.uid})` : 'Unknown';
+                const myPhoto = user ? user.photo : getAvatar('unknown');
+
+                return `
+                    <tr>
+                        <td>${a.date}</td>
+                        <td>${a.timeSlot}</td>
+                        <td style="text-align:center;">
+                             <img src="${myPhoto}" class="adj-photo-cell">
+                             <div>${assigneeInfo}</div>
+                        </td>
+                        <td>${a.reason}</td>
+                        <td><span class="status-badge badge-${a.status.toLowerCase()}">${a.status}</span></td>
+                    </tr>`;
+            };
+
+            let notificationHTML = '';
+            if(incomingRequests.some(r => r.status === 'Pending')) {
+                notificationHTML = `<div class="adj-notification"><i class="fas fa-exclamation-triangle" style="font-size: 1.5rem;"></i><div><strong>Pending Adjustment Requests!</strong><br>You have requests waiting for approval.</div></div>`;
+            }
+
+            const getWorkload = (uid) => timetableData.filter(t => t.userId === uid).length;
+            
+            const recipientOptions = state.users
+                .filter(u => u.role === 'employee' && u.id !== user.id)
+                .sort((a, b) => getWorkload(a.id) - getWorkload(b.id))
+                .map(u => {
+                    const workload = getWorkload(u.id);
+                    return `<option value="${u.id}">${u.name} (${u.uid}) - [Work Load: ${workload}]</option>`;
+                }).join('');
+
+            contentArea.innerHTML = `
+                <h2 class="header-title">Schedule Adjustments</h2>
+                ${notificationHTML}
+                <div class="adj-layout">
+                    <div class="adj-left">
+                        <div class="card">
+                            <h3>Request Adjustment</h3>
+                            <form onsubmit="requestAdjustment(event)">
+                                <div class="form-group"><label>Date</label><input type="date" id="adj-date" required onchange="checkAdjInputs()"></div>
+                                <div class="form-group"><label>Time Slot</label><select id="adj-time" required onchange="checkAdjInputs()"><option value="">Select Time</option>${timetableSlots.filter(t=>t!=="Short Break").map(t => `<option value="${t}">${t}</option>`).join('')}</select></div>
+                                <div class="form-group"><label>Assign To (Faculty) <small style="color:var(--text-grey)">Select Date & Time first</small></label>
+                                    <select id="adj-to" disabled style="background-color: #f3f4f6; cursor: not-allowed; color: #999;">
+                                        <option value="">Select Date & Time First</option>
+                                    </select>
+                                </div>
+                                <div class="form-group"><label>Reason</label><input type="text" id="adj-reason" required placeholder="e.g. Medical Leave"></div>
+                                <button type="submit" class="btn btn-primary">Send Request</button>
+                            </form>
+                        </div>
+                    </div>
+                    <div class="adj-right">
+                        <div class="card"><h3>My Requests</h3><table><thead><tr><th>Date</th><th>Time</th><th>My Details</th><th>Assigned To</th><th>Reason</th><th>Status</th></tr></thead><tbody>${myRequests.length ? myRequests.map(renderMyRequestRow).join('') : '<tr><td colspan="6">No requests found.</td></tr>'}</tbody></table></div>
+                        <div class="card"><h3>Requests Assigned To Me</h3><table><thead><tr><th>Date</th><th>Time</th><th>Requested By</th><th>Reason</th><th>Status</th><th>Action</th></tr></thead><tbody>${incomingRequests.length ? incomingRequests.map(renderIncomingRow).join('') : '<tr><td colspan="6">No pending requests.</td></tr>'}</tbody></table></div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function checkAdjInputs() {
+            const date = document.getElementById('adj-date').value;
+            const time = document.getElementById('adj-time').value;
+            const select = document.getElementById('adj-to');
+            
+            if(date && time) {
+                const getWorkload = (uid) => timetableData.filter(t => t.userId === uid).length;
+                const recipientOptions = state.users
+                    .filter(u => u.role === 'employee' && u.id !== state.currentUser.id)
+                    .sort((a, b) => getWorkload(a.id) - getWorkload(b.id))
+                    .map(u => {
+                        const workload = getWorkload(u.id);
+                        return `<option value="${u.id}">${u.name} (${u.uid}) - [Work Load: ${workload}]</option>`;
+                    }).join('');
+                
+                select.innerHTML = `<option value="">Select Faculty</option>` + recipientOptions;
+                select.disabled = false;
+                select.style.backgroundColor = "white";
+                select.style.color = "#333";
+            } else {
+                select.innerHTML = `<option value="">Select Date & Time First</option>`;
+                select.disabled = true;
+                select.style.backgroundColor = "#f3f4f6";
+                select.style.color = "#999";
+            }
+        }
+
+        function requestAdjustment(e) {
+            e.preventDefault();
+            const date = document.getElementById('adj-date').value;
+            const time = document.getElementById('adj-time').value;
+            const toId = parseInt(document.getElementById('adj-to').value);
+            const reason = document.getElementById('adj-reason').value;
+            
+            if(!toId) return showToast("Select valid faculty.");
+            state.adjustments.push({ id: Date.now(), fromId: state.currentUser.id, toId: toId, date: date, timeSlot: time, reason: reason, status: 'Pending', timestamp: new Date().toISOString() });
+            state.messages.push({ id: Date.now(), fromId: 0, toId: toId, subject: "New Adjustment Request", content: `${state.currentUser.name} req: ${date} ${time}`, date: new Date().toLocaleString(), read: false, timestamp: new Date().toISOString() });
+            saveState();
+            updateNotificationCount();
+            showToast("Adjustment Request Sent!");
+            renderAdjustments();
+        }
+
+        function processAdjustment(id, status) {
+            const adj = state.adjustments.find(a => a.id === id);
+            if(adj) { adj.status = status; saveState(); updateNotificationCount(); showToast(`Adjustment ${status}`); renderAdjustments(); }
+        }
+
+        /* --- CLASS UPDATE (UPDATED: Delete Option & HOD View) --- */
+        function renderClassUpdate() {
+            const user = state.currentUser;
+            const myUpdates = state.studentUpdates.filter(u => u.teacherId === user.id);
+
+            const classOptions = availableClasses.map(c => `<option value="${c}">${c}</option>`).join('');
+            editingUpdateId = null;
+
+            // Helper to get teacher's assigned classes (from Timetable)
+            // Get unique subject/block strings
+            const myClasses = timetableData.filter(t => t.userId === user.id).map(t => `${t.subject} (${t.block})`);
+            const uniqueClasses = [...new Set(myClasses)].join(', ');
+
+            contentArea.innerHTML = `
+                <h2 class="header-title">Class Update</h2>
+                <div class="msg-container">
+                    <div class="msg-pane msg-compose">
+                        <div class="msg-compose-card">
+                            <h3 style="margin-bottom:15px; color:var(--primary); border-bottom:1px solid #eee; padding-bottom:10px;"><i class="fas fa-chalkboard-teacher"></i> Post Daily Update</h3>
+                            
+                            <!-- HOD: Show Teacher's Assigned Classes -->
+                            ${user.role === 'hod' ? `<div style="background:#e0f2fe; padding:10px; border-radius:4px; margin-bottom:15px; font-size:0.9rem; color:#0369a1;"><strong><i class="fas fa-info-circle"></i> Teacher's Current Classes:</strong> ${uniqueClasses || 'None assigned'}</div>` : ''}
+
+                            <!-- Add/Manage Class -->
+                            <div style="background:#f0f9ff; padding:10px; border-radius:6px; margin-bottom:15px; display:flex; gap:10px; align-items:flex-end;">
+                                <div style="flex:1;">
+                                    <label style="font-size:0.8rem; font-weight:600; color:var(--primary);">Add New Class</label>
+                                    <input type="text" id="new-class-name" placeholder="e.g. CSE-C" class="msg-input" style="padding:8px; font-size:0.9rem;">
+                                </div>
+                                <button type="button" class="btn btn-primary btn-sm" onclick="addNewClass()" style="margin:0; width:auto;"><i class="fas fa-plus"></i> Add</button>
+                            </div>
+
+                            <!-- Manage/Delete Classes -->
+                            <div class="class-item-list" id="class-list-container">
+                                ${availableClasses.map(c => `
+                                    <div class="class-item-row">
+                                        <span>${c}</span>
+                                        <span class="btn-delete-small" onclick="deleteClassOption('${c}')"><i class="fas fa-trash"></i> Delete</span>
+                                    </div>
+                                `).join('')}
+                            </div>
+
+                            <form id="class-update-form" onsubmit="postClassUpdate(event)" style="margin-top:15px;">
+                                <div class="msg-form-group">
+                                    <label>Target Class</label>
+                                    <select id="cu-class" class="msg-input" required>
+                                        ${classOptions}
+                                    </select>
+                                </div>
+                                <div class="msg-form-group"><label>Update Title</label><input type="text" id="cu-title" class="msg-input" placeholder="e.g. Assignment 3" required></div>
+                                <div class="msg-form-group"><label>Type</label><select id="cu-type" class="msg-input"><option value="Assignment">Assignment</option><option value="Surprise">Surprise Test</option><option value="Update">Class Update</option></select></div>
+                                <div class="msg-form-group" style="flex:1; display:flex; flex-direction:column;"><label>Content</label><textarea id="cu-content" class="msg-textarea" placeholder="Paste instructions here..." required></textarea></div>
+                                <button type="submit" id="cu-submit-btn" class="btn btn-primary" style="margin-top:15px;"><i class="fas fa-paper-plane"></i> Post to Students</button>
+                                ${editingUpdateId ? `<button type="button" class="btn btn-danger" onclick="cancelEditClass()" style="margin-top:10px;">Cancel Edit</button>` : ''}
+                            </form>
+                        </div>
+                    </div>
+                    <div class="msg-pane">
+                        <div class="card" style="height:100%; display:flex; flex-direction: column; margin:0; overflow:hidden;">
+                            <div class="card-header"><h3 style="margin:0; color:var(--primary);"><i class="fas fa-history"></i> Update History</h3></div>
+                            <div style="overflow-y:auto; flex:1; padding-right:5px;">
+                                ${myUpdates.length === 0 ? '<div style="text-align:center; color:#999; margin-top:50px;">No updates posted yet.</div>' : myUpdates.map(u => `
+                                    <div class="update-card">
+                                        <div class="update-actions">
+                                            <button class="update-action-btn edit" onclick="editClassUpdate(${u.id})" title="Edit"><i class="fas fa-edit"></i></button>
+                                            <button class="update-action-btn delete" onclick="deleteClassUpdate(${u.id})" title="Delete"><i class="fas fa-trash"></i></button>
+                                        </div>
+                                        <div style="display:flex; justify-content:space-between; margin-right: 60px;">
+                                            <strong>${u.title}</strong><span class="status-badge badge-${u.type === 'Assignment' ? 'pending' : 'approved'}">${u.type}</span>
+                                        </div>
+                                        <div style="font-size:0.8rem; color:var(--primary); font-weight:bold; margin:5px 0;">To: ${u.targetClass}</div>
+                                        <div style="font-size:0.9rem; color:#555; margin-top:5px; white-space: pre-wrap;">${u.content}</div>
+                                        <div style="font-size:0.8rem; color:#999; margin-top:10px;">Posted: ${u.date}</div>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function deleteClassOption(className) {
+            if(confirm(`Are you sure you want to delete "${className}" from the list?`)) {
+                availableClasses = availableClasses.filter(c => c !== className);
+                saveState();
+                renderClassUpdate();
+            }
+        }
+
+        function addNewClass() {
+            const name = document.getElementById('new-class-name').value.trim();
+            if(name) {
+                if(!availableClasses.includes(name)) {
+                    availableClasses.push(name);
+                    saveState();
+                    renderClassUpdate();
+                    showToast("Class Added!");
+                } else {
+                    showToast("Class already exists.");
+                }
+            }
+        }
+
+        function postClassUpdate(e) {
+            e.preventDefault();
+            const targetClass = document.getElementById('cu-class').value;
+            const title = document.getElementById('cu-title').value;
+            const type = document.getElementById('cu-type').value;
+            const content = document.getElementById('cu-content').value;
+
+            if (editingUpdateId) {
+                const idx = state.studentUpdates.findIndex(u => u.id === editingUpdateId);
+                if (idx !== -1) {
+                    state.studentUpdates[idx] = { 
+                        ...state.studentUpdates[idx], 
+                        targetClass, title, type, content, 
+                        date: new Date().toLocaleString() + ' (Edited)' 
+                    };
+                    showToast("Update Modified!");
+                }
+                editingUpdateId = null;
+            } else {
+                const newUpdate = {
+                    id: Date.now(), teacherId: state.currentUser.id, teacherName: state.currentUser.name,
+                    targetClass: targetClass,
+                    title: title, type: type, content: content, date: new Date().toLocaleString(), timestamp: new Date().toISOString()
+                };
+                state.studentUpdates.push(newUpdate);
+                showToast(`Update Posted to ${targetClass}!`);
+                document.querySelector('form').reset();
+            }
+            
+            saveState();
+            renderClassUpdate();
+        }
+
+        function editClassUpdate(id) {
+            const u = state.studentUpdates.find(x => x.id === id);
+            if (!u) return;
+
+            editingUpdateId = id;
+            
+            document.getElementById('cu-class').value = u.targetClass;
+            document.getElementById('cu-title').value = u.title;
+            document.getElementById('cu-type').value = u.type;
+            document.getElementById('cu-content').value = u.content;
+            
+            const btn = document.getElementById('cu-submit-btn');
+            btn.innerHTML = '<i class="fas fa-save"></i> Save Changes';
+            btn.classList.replace('btn-primary', 'btn-warning');
+
+            if(!document.getElementById('cancel-edit-btn')) {
+                const form = document.getElementById('class-update-form');
+                const cancelBtn = document.createElement('button');
+                cancelBtn.type = 'button';
+                cancelBtn.id = 'cancel-edit-btn';
+                cancelBtn.className = 'btn btn-danger';
+                cancelBtn.style.marginTop = '10px';
+                cancelBtn.innerText = 'Cancel Edit';
+                cancelBtn.onclick = cancelEditClass;
+                form.appendChild(cancelBtn);
+            }
+            
+            document.querySelector('.msg-compose').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function cancelEditClass() {
+            editingUpdateId = null;
+            renderClassUpdate();
+        }
+
+        function deleteClassUpdate(id) {
+            if(confirm("Are you sure you want to delete this update?")) {
+                state.studentUpdates = state.studentUpdates.filter(u => u.id !== id);
+                saveState();
+                showToast("Update Deleted.");
+                renderClassUpdate();
+            }
+        }
+
+        /* --- MESSAGES --- */
+        function renderMessages() {
+            const user = state.currentUser;
+            
+            if (user.role === 'student') {
+                renderStudentGroupChat();
+                return;
+            }
+
+            let msgs = [];
+            if (currentMsgTab === 'inbox') {
+                msgs = state.messages.filter(m => m.toId === user.id);
+                msgs.sort((a,b) => new Date(b.timestamp) - new Date(a.timestamp));
+            } else {
+                msgs = state.messages.filter(m => m.fromId === user.id);
+                msgs.sort((a,b) => new Date(b.timestamp) - new Date(a.timestamp));
+            }
+
+            const recipientOptions = state.users.filter(u => u.id !== user.id).map(u => `<option value="${u.id}">${u.name} (${u.dept})</option>`).join('');
+
+            contentArea.innerHTML = `
+                <h2 class="header-title">Messages</h2>
+                <div class="modern-msg-container">
+                    <div class="modern-compose-pane">
+                        <h3 style="margin-bottom:25px; color:var(--primary);"><i class="fas fa-pen-fancy"></i> Compose</h3>
+                        <form onsubmit="sendNewMessage(event)">
+                            <div class="modern-input-group">
+                                <label class="modern-input-label">To</label>
+                                <select id="msg-to" class="modern-input-field" required>
+                                    <option value="">Select Recipient</option>${recipientOptions}
+                                </select>
+                            </div>
+                            <div class="modern-input-group">
+                                <label class="modern-input-label">Subject</label>
+                                <input type="text" id="msg-subject" class="modern-input-field" placeholder="Enter subject" required>
+                            </div>
+                            <div class="modern-input-group" style="flex:1; display:flex; flex-direction:column;">
+                                <label class="modern-input-label">Message</label>
+                                <textarea id="msg-content" class="modern-input-field modern-textarea" placeholder="Type your message here..." required></textarea>
+                            </div>
+                            <button type="submit" class="btn btn-primary" style="margin-top:15px; padding:12px;"><i class="fas fa-paper-plane"></i> Send Message</button>
+                        </form>
+                    </div>
+                    
+                    <div class="modern-list-pane">
+                        <div class="modern-msg-header">
+                            <h3 style="margin:0; color:var(--dark);"><i class="fas fa-${currentMsgTab === 'inbox' ? 'inbox' : 'paper-plane'}"></i> ${currentMsgTab === 'inbox' ? 'Inbox' : 'Sent'}</h3>
+                            <div style="display:flex; gap:15px;">
+                                <button class="msg-toggle-btn ${currentMsgTab === 'inbox' ? 'active' : ''}" onclick="switchMsgTab('inbox')">Inbox</button>
+                                <button class="msg-toggle-btn ${currentMsgTab === 'sent' ? 'active' : ''}" onclick="switchMsgTab('sent')">Sent</button>
+                            </div>
+                        </div>
+                        <div class="modern-msg-list">
+                            ${msgs.length === 0 ? '<div style="text-align:center; padding:40px; color:#999;">No messages found.</div>' : msgs.map(m => renderModernMessageItem(m, user.id)).join('')}
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderModernMessageItem(m, myId) {
+            const isMe = m.fromId === myId;
+            const otherId = isMe ? m.toId : m.fromId;
+            const otherUser = state.users.find(u => u.id === otherId) || { name: 'System', photo: '' };
+            
+            const avatarHtml = `<img src="${otherUser.photo || getAvatar('system')}" class="modern-avatar" alt="Avatar">`;
+            const senderLabel = isMe ? `To: ${otherUser.name}` : otherUser.name;
+            const unreadClass = (!isMe && !m.read) ? 'unread' : '';
+            
+            return `
+                <div class="modern-msg-item ${unreadClass}" ${!isMe && !m.read ? `onclick="markAsRead(${m.id})"` : ''}>
+                    ${avatarHtml}
+                    <div class="modern-content">
+                        <div class="modern-top-row">
+                            <span class="modern-sender">${senderLabel}</span>
+                            <span class="modern-time">${m.date}</span>
+                        </div>
+                        <div class="modern-subject">${m.subject}</div>
+                        <div class="modern-snippet">${m.content}</div>
+                    </div>
+                </div>
+            `;
+        }
+
+        /* --- STUDENT GROUP CHAT --- */
+        function renderStudentGroupChat() {
+            const user = state.currentUser;
+            const canAddStudent = user.role === 'employee' || user.role === 'hod';
+            
+            contentArea.innerHTML = `
+                <h2 class="header-title">Group Chat</h2>
+                <div class="proper-chat-container">
+                    <div class="chat-header">
+                        <div><strong>Class Group (CSE-2024)</strong><br><small>${state.users.filter(u=>u.role==='student').length + 5} Members</small></div>
+                        <div class="chat-header-icons">
+                            <button class="chat-icon-btn" title="Video Call" onclick="startGroupCall()"><i class="fas fa-video"></i></button>
+                            ${canAddStudent ? `<button class="chat-icon-btn" title="Add Student" onclick="openAddStudentModal()"><i class="fas fa-user-plus"></i></button>` : ''}
+                        </div>
+                    </div>
+                    <div class="chat-area" id="chat-scroller">
+                        ${state.groupChat.map(m => {
+                            const isMe = m.senderId === user.id;
+                            return `<div class="chat-bubble ${isMe ? 'right' : 'left'}"><strong>${isMe ? 'You' : m.senderName}</strong><br>${m.text}<div class="chat-time">${m.time}</div></div>`;
+                        }).join('')}
+                    </div>
+                    <div class="chat-input-area">
+                        <input type="text" id="chat-input-text" class="chat-input" placeholder="Type a message...">
+                        <button class="chat-send-btn" onclick="sendGroupMessage()"><i class="fas fa-paper-plane"></i></button>
+                    </div>
+                </div>
+            `;
+            setTimeout(() => { const s = document.getElementById('chat-scroller'); if(s) s.scrollTop = s.scrollHeight; }, 100);
+        }
+
+        function startGroupCall() {
+            showToast("Starting Video Call...");
+            setTimeout(() => showToast("Connecting to Group Video Server..."), 2000);
+        }
+
+        function openAddStudentModal() {
+            const select = document.getElementById('add-student-select');
+            select.innerHTML = '';
+            state.users.filter(u => u.role === 'student').forEach(s => {
+                select.innerHTML += `<option value="${s.id}">${s.name} (${s.uid})</option>`;
+            });
+            document.getElementById('add-student-modal').style.display = 'flex';
+        }
+
+        function confirmAddStudent() {
+            const id = parseInt(document.getElementById('add-student-select').value);
+            const student = state.users.find(u => u.id === id);
+            if(student) {
+                showToast(`${student.name} has been added to the group.`);
+                state.groupChat.push({
+                    id: Date.now(),
+                    senderId: 0,
+                    senderName: 'System',
+                    text: `${student.name} joined the group.`,
+                    time: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})
+                });
+                saveState();
+                renderStudentGroupChat();
+            }
+            closeModal('add-student-modal');
+        }
+
+        function sendGroupMessage() {
+            const input = document.getElementById('chat-input-text');
+            const text = input.value.trim();
+            if(!text) return;
+            const newMsg = { id: Date.now(), senderId: state.currentUser.id, senderName: state.currentUser.name, text: text, time: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) };
+            state.groupChat.push(newMsg);
+            saveState();
+            input.value = '';
+            renderMessages();
+        }
+
+        function switchMsgTab(tab) {
+            currentMsgTab = tab;
+            renderMessages();
+        }
+
+        function markAsRead(msgId) {
+            const msg = state.messages.find(m => m.id === msgId);
+            if (msg && !msg.read) {
+                msg.read = true;
+                saveState();
+                updateNotificationCount();
+                renderMessages(); 
+            }
+        }
+
+        function sendNewMessage(e) {
+            e.preventDefault();
+            const toId = parseInt(document.getElementById('msg-to').value);
+            const subject = document.getElementById('msg-subject').value;
+            const content = document.getElementById('msg-content').value;
+            const newMsg = { id: Date.now(), fromId: state.currentUser.id, toId: toId, subject: subject, content: content, date: new Date().toLocaleString(), read: false, timestamp: new Date().toISOString() };
+            state.messages.push(newMsg);
+            saveState();
+            updateNotificationCount();
+            showToast("Message Sent!");
+            document.getElementById('msg-to').parentElement.parentElement.reset();
+            currentMsgTab = 'sent'; 
+            renderMessages(); 
+        }
+
+        /* --- STUDENT UPDATES --- */
+        function renderStudentUpdates() {
+            state.studentUpdates.forEach(u => { if(!u.read) u.read = true; });
+            saveState();
+            updateNotificationCount();
+
+            if (state.studentUpdates.length === 0) {
+                 contentArea.innerHTML = `<h2 class="header-title">Daily Updates</h2><div style="text-align:center; padding:50px; color:#999;">No updates available yet.</div>`;
+                 return;
+            }
+
+            contentArea.innerHTML = `
+                <h2 class="header-title">Daily Updates</h2>
+                <div class="updates-timeline">
+                    ${state.studentUpdates.map(u => {
+                        let iconClass = 'fa-bullhorn';
+                        let color = 'var(--primary)';
+                        if(u.type === 'Assignment') { iconClass = 'fa-book'; color = 'var(--warning)'; }
+                        if(u.type === 'Surprise') { iconClass = 'fa-clipboard-check'; color = 'var(--success)'; }
+                        
+                        return `
+                        <div class="timeline-item">
+                            <div class="timeline-icon" style="border-color:${color}; color:${color};">
+                                <i class="fas ${iconClass}"></i>
+                            </div>
+                            <div class="timeline-content">
+                                <div class="timeline-date">${u.date} <span style="margin-left:10px; background:#eee; padding:2px 6px; border-radius:4px; font-size:0.7rem; color:#666;">${u.type}</span></div>
+                                <h3 style="margin:5px 0; color:var(--dark);">${u.title}</h3>
+                                <p style="font-size:0.9rem; color:#555; margin-bottom:10px;"><strong>Class:</strong> ${u.targetClass}</p>
+                                <div style="background:#f9f9f9; padding:10px; border-radius:6px; border-left:3px solid #ccc; font-size:0.9rem; white-space: pre-wrap;">${u.content}</div>
+                                <div style="margin-top:10px; font-size:0.8rem; color:#888;">Posted by: ${u.teacherName}</div>
+                            </div>
+                        </div>
+                        `;
+                    }).join('')}
+                </div>
+            `;
+        }
+
+        /* --- TIMETABLE (UPDATED: + Symbol & Auto Fill) --- */
+        function renderTimetable() {
+            const days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
+            const user = state.currentUser;
+            
+            let viewingUserId = user.role === 'employee' ? user.id : viewTimetableForUserId;
+            let viewingUser = state.users.find(u => u.id === viewingUserId);
+
+            let rows = "";
+            if(viewingUser) {
+                days.forEach(day => {
+                    rows += `<tr><td class="tt-day-col">${day}</td>`;
+                    timetableSlots.forEach(slot => {
+                        const record = timetableData.find(t => t.day === day && t.time === slot && t.userId === viewingUserId);
+                        if (record) {
+                            rows += `<td class="tt-cell" onclick="loadSlotToEdit('${day}', '${slot}')"><div class="tt-content"><span class="tt-subj">${record.subject}</span><span class="tt-code">${record.courseCode || ''}</span><span class="tt-block">${record.block || ''}</span><span class="tt-room">${record.room}</span></div><div class="tt-plus-btn"><i class="fas fa-plus"></i></div></td>`;
+                        } else if (slot === "Short Break") {
+                            rows += `<td class="tt-cell tt-break">Short Break</td>`;
+                        } else {
+                            // Empty cell with plus button
+                            rows += `<td class="tt-cell" onclick="loadSlotToEdit('${day}', '${slot}')" style="background:#fafafa;"><span class="tt-free">-</span><div class="tt-plus-btn"><i class="fas fa-plus"></i></div></td>`;
+                        }
+                    });
+                    rows += `</tr>`;
+                });
+            } else {
+                rows = `<tr><td colspan="${timetableSlots.length + 1}" style="text-align:center; color:#999;">Please select an employee to view timetable.</td></tr>`;
+            }
+
+            let headerContent = `<h2 class="header-title">Timetable Management</h2>`;
+            let actionBar = '';
+            let fabAdd = '';
+
+            if (user.role === 'hod' || user.role === 'oa') {
+                actionBar = `
+                    <div style="background:#e0f2fe; padding:20px; border-radius:12px; margin-bottom:20px; border:1px solid #bae6fd; display:flex; gap:15px; align-items:center; flex-wrap:wrap;">
+                        <div style="font-weight:bold; color:#0369a1; font-size:1.1rem;"><i class="fas fa-search"></i> View Faculty Timetable</div>
+                        <div style="flex:1; min-width:200px;">
+                            <input type="text" id="search-emp-id" class="msg-input" placeholder="Enter Employee ID (e.g. E14746)" style="padding:10px;">
+                        </div>
+                        <button class="btn btn-primary" onclick="searchEmployeeTimetable()" style="margin:0; width:auto;">Search</button>
+                        <button class="btn btn-danger" onclick="clearTimetableSearch()" style="margin:0; width:auto;">Clear</button>
+                    </div>
+                `;
+            } else if (user.role === 'employee') {
+                fabAdd = `<div class="fab-add" onclick="scrollToEditForm()" title="Add Slot"><i class="fas fa-plus"></i></div>`;
+                
+                actionBar = `
+                    <div class="tt-edit-form" id="edit-form-section" style="background:white; padding:15px; border-radius:var(--radius); margin-bottom:20px; border:1px solid #eee; scroll-margin-top: 20px;">
+                        <h4><i class="fas fa-edit"></i> Add / Edit Slot</h4>
+                        <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap:10px; align-items:end;">
+                            <div class="form-group"><label>Day</label><select id="tt-edit-day">${days.map(d=>`<option value="${d}">${d}</option>`).join('')}</select></div>
+                            <div class="form-group"><label>Time</label><select id="tt-edit-time">${timetableSlots.map(t=>`<option value="${t}">${t}</option>`).join('')}</select></div>
+                            <div class="form-group"><label>Subject</label><input type="text" id="tt-edit-subject" placeholder="Subject"></div>
+                            <div class="form-group"><label>Code</label><input type="text" id="tt-edit-code" placeholder="Code"></div>
+                            <div class="form-group"><label>Block</label><input type="text" id="tt-edit-block" placeholder="Block"></div>
+                            <div class="form-group"><label>Room</label><input type="text" id="tt-edit-room" placeholder="Room"></div>
+                        </div>
+                        <div style="display:flex; gap:10px; margin-top:10px;">
+                            <button class="btn btn-primary btn-sm" onclick="updateTimetableSlot()"><i class="fas fa-save"></i> Save Slot</button> 
+                            <button class="btn btn-danger btn-sm" onclick="deleteSlot()"><i class="fas fa-trash"></i> Delete Selected</button>
+                        </div>
+                    </div>
+                `;
+            } else {
+                actionBar = `<div style="background:#e0f2fe; padding:15px; border-radius:8px; margin-bottom:20px; border:1px solid #bae6fd; color:#0369a1;"><i class="fas fa-info-circle"></i> <strong>Notice:</strong> Timetable is managed by the Administration.</div>`;
+            }
+
+            let userLabel = viewingUser ? `<h3 style="color:var(--primary); margin-bottom:15px;">Viewing: ${viewingUser.name} (${viewingUser.uid})</h3>` : '';
+
+            contentArea.innerHTML = `
+                ${headerContent}
+                ${actionBar}
+                ${userLabel}
+                <div class="card">
+                    <div style="overflow-x: auto;"><table id="tt-table"><thead><tr><th class="tt-day-col">Day</th>${timetableSlots.map(s=>`<th class="tt-time-header ${s === 'Short Break' ? 'tt-break' : ''}">${s}</th>`).join('')}</tr></thead><tbody>${rows}</tbody></table></div>
+                </div>
+                ${fabAdd}
+            `;
+        }
+
+        // Auto fill logic triggered by clicking the cell (or + button)
+        function loadSlotToEdit(day, time) {
+            const user = state.currentUser;
+            if (user.role !== 'employee') return; // Only employees can edit
+
+            document.getElementById('tt-edit-day').value = day;
+            document.getElementById('tt-edit-time').value = time;
+            const record = timetableData.find(t => t.userId === user.id && t.day === day && t.time === time);
+            if(record) {
+                document.getElementById('tt-edit-subject').value = record.subject;
+                document.getElementById('tt-edit-code').value = record.courseCode || '';
+                document.getElementById('tt-edit-block').value = record.block || '';
+                document.getElementById('tt-edit-room').value = record.room || '';
+            } else {
+                ['tt-edit-subject','tt-edit-code','tt-edit-block','tt-edit-room'].forEach(id => document.getElementById(id).value = '');
+            }
+            scrollToEditForm();
+        }
+
+        function searchEmployeeTimetable() {
+            const searchId = document.getElementById('search-emp-id').value.trim();
+            const targetUser = state.users.find(u => (u.username === searchId || u.uid === searchId) && u.role === 'employee');
+            
+            if(targetUser) {
+                viewTimetableForUserId = targetUser.id;
+                renderTimetable();
+                showToast(`Showing timetable for ${targetUser.name}`);
+            } else {
+                showToast("Employee not found.");
+            }
+        }
+
+        function clearTimetableSearch() {
+            viewTimetableForUserId = null;
+            document.getElementById('search-emp-id').value = '';
+            renderTimetable();
+        }
+
+        function scrollToEditForm() {
+            const form = document.getElementById('edit-form-section');
+            if(form) {
+                form.scrollIntoView({ behavior: 'smooth' });
+                form.style.transition = "background 0.3s";
+                form.style.backgroundColor = "#fff1f2";
+                setTimeout(() => form.style.backgroundColor = "white", 500);
+            }
+        }
+
+        function updateTimetableSlot() {
+            const day = document.getElementById('tt-edit-day').value;
+            const time = document.getElementById('tt-edit-time').value;
+            const subject = document.getElementById('tt-edit-subject').value;
+            const code = document.getElementById('tt-edit-code').value;
+            const block = document.getElementById('tt-edit-block').value;
+            const room = document.getElementById('tt-edit-room').value;
+            
+            if(!subject || !room) return showToast("Please enter Subject and Room.");
+
+            const existingIndex = timetableData.findIndex(t => t.userId === state.currentUser.id && t.day === day && t.time === time);
+            if(existingIndex > -1) {
+                timetableData[existingIndex] = { userId: state.currentUser.id, day, time, subject, courseCode: code, block: block, room };
+                showToast("Slot Updated!");
+            } else {
+                timetableData.push({ userId: state.currentUser.id, day, time, subject, courseCode: code, block: block, room });
+                showToast("Slot Added!");
+            }
+            saveState();
+            renderTimetable();
+        }
+
+        function deleteSlot() {
+            const day = document.getElementById('tt-edit-day').value;
+            const time = document.getElementById('tt-edit-time').value;
+            const idx = timetableData.findIndex(t => t.userId === state.currentUser.id && t.day === day && t.time === time);
+            if(idx > -1) {
+                timetableData.splice(idx, 1);
+                saveState();
+                showToast("Slot Deleted!");
+                renderTimetable();
+            } else {
+                showToast("No slot selected to delete.");
+            }
+        }
+
+        /* --- PROFILE (UPDATED: Show UID instead of Role) --- */
+        let isEditingProfile = false;
+        let tempProfilePic = null;
+        
+        function renderProfile() {
+            const user = state.currentUser;
+            const photoSrc = user.photo ? user.photo : "";
+            
+            if(!isEditingProfile) {
+                const studentFields = user.role === 'student' ? `
+                    <div class="info-box">
+                        <div class="info-icon"><i class="fas fa-id-card"></i></div>
+                        <div class="info-details"><h5>Student Code</h5><span>${user.studentCode || 'N/A'}</span></div>
+                    </div>
+                    <div class="info-box">
+                        <div class="info-icon"><i class="fas fa-users"></i></div>
+                        <div class="info-details"><h5>Section</h5><span>${user.section || 'N/A'}</span></div>
+                    </div>
+                    <div class="info-box">
+                        <div class="info-icon"><i class="fas fa-user-tie"></i></div>
+                        <div class="info-details"><h5>Father's Name</h5><span>${user.fatherName || 'N/A'}</span></div>
+                    </div>
+                    <div class="info-box">
+                        <div class="info-icon"><i class="fas fa-user-friends"></i></div>
+                        <div class="info-details"><h5>Mother's Name</h5><span>${user.otherName || 'N/A'}</span></div>
+                    </div>
+                ` : '';
+
+                let statsHTML = '';
+                if (user.role === 'student') {
+                    statsHTML = `
+                        <div class="stat-box"><h4>${user.cgpa || '0.0'}</h4><p>CGPA</p></div>
+                        <div class="stat-box"><h4>${attendanceData.filter(a => a.userId === user.id && a.status === 'Present').length}</h4><p>Days Present</p></div>
+                        <div class="stat-box"><h4>${state.studentUpdates.length}</h4><p>Updates Viewed</p></div>
+                    `;
+                } else {
+                    statsHTML = `
+                        <div class="stat-box"><h4>${getUserWorkload(user.id)}</h4><p>Weekly Classes</p></div>
+                        <div class="stat-box"><h4>${state.studentUpdates.filter(u => u.teacherId === user.id).length}</h4><p>Updates Posted</p></div>
+                        <div class="stat-box"><h4>4.8</h4><p>Rating</p></div>
+                    `;
+                }
+
+                // UPDATED: Badge shows UID instead of Role
+                contentArea.innerHTML = `
+                    <div class="profile-pro-container">
+                        <div class="profile-card">
+                            <div class="profile-header-bg"><i class="fas fa-university"></i></div>
+                            <div class="profile-pic-wrapper" onclick="document.getElementById('profile-upload-input').click()" title="Change Photo">
+                                ${!photoSrc ? '<i class="fas fa-user fa-3x" style="color:#ddd; width:100%; height:100%; display:flex; align-items:center; justify-content:center;"></i>' : ''}
+                                <img src="${photoSrc}" class="profile-pic-large" ${photoSrc ? '' : 'display:none'}>
+                                <div class="overlay"><i class="fas fa-camera"></i> Change</div>
+                                <div class="verified-badge"><i class="fas fa-check-circle"></i></div>
+                            </div>
+                            <input type="file" id="profile-upload-input" accept="image/*" style="display:none" onchange="previewProfileImage(this)">
+                            <div class="profile-body">
+                                <div class="profile-title-section">
+                                    <div>
+                                        <h2 class="profile-name">${user.name} <span class="profile-role-badge">${user.uid}</span></h2>
+                                        <div class="profile-meta" style="margin-top:8px;"><i class="fas fa-id-badge"></i> ${user.role.toUpperCase()} &nbsp;&nbsp; | &nbsp;&nbsp; <i class="fas fa-university"></i> ${user.college}</div>
+                                        <div class="profile-meta" style="margin-top:5px;"><i class="fas fa-building"></i> ${user.dept} ${user.block ? ` | ${user.block}` : ''}</div>
+                                    </div>
+                                    <div class="profile-actions"><button class="btn btn-primary btn-profile-action" onclick="toggleProfileEdit(true)" style="width:auto; padding: 10px 20px;"><i class="fas fa-pen"></i> Edit Profile</button></div>
+                                </div>
+                                <div class="profile-stats">
+                                    ${statsHTML}
+                                </div>
+                                <div class="profile-info-grid">
+                                    <div class="info-box">
+                                        <div class="info-icon"><i class="fas fa-envelope"></i></div>
+                                        <div class="info-details">
+                                            <h5>Email Address</h5>
+                                            <span>${user.email || 'Not Set'}</span>
+                                        </div>
+                                    </div>
+                                    <div class="info-box">
+                                        <div class="info-icon"><i class="fab fa-google"></i></div>
+                                        <div class="info-details">
+                                            <h5>Gmail</h5>
+                                            <span>${user.gmail || 'Not Set'}</span>
+                                        </div>
+                                    </div>
+                                    <div class="info-box">
+                                        <div class="info-icon"><i class="fas fa-phone"></i></div>
+                                        <div class="info-details">
+                                            <h5>Phone Number</h5>
+                                            <span>${user.phone || 'Not Set'}</span>
+                                        </div>
+                                    </div>
+                                    <div class="info-box">
+                                        <div class="info-icon"><i class="fas fa-map-marker-alt"></i></div>
+                                        <div class="info-details">
+                                            <h5>Campus Location</h5>
+                                            <span>${user.location || 'Not Set'}</span>
+                                        </div>
+                                    </div>
+                                    ${studentFields}
+                                    <div class="info-box">
+                                        <div class="info-icon"><i class="fas fa-calendar-check"></i></div>
+                                        <div class="info-details">
+                                            <h5>Join Date</h5>
+                                            <span>${user.joinDate || 'N/A'}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            } else {
+                // EDIT MODE
+                const studentEditFields = user.role === 'student' ? `
+                    <div class="form-group"><label>Student Code</label><input type="text" id="edit-student-code" value="${user.studentCode || ''}"></div>
+                    <div class="form-group"><label>Section</label><input type="text" id="edit-section" value="${user.section || ''}"></div>
+                    <div class="form-group"><label>Gmail</label><input type="email" id="edit-gmail" value="${user.gmail || ''}"></div>
+                    <div class="form-group"><label>Father's Name</label><input type="text" id="edit-father" value="${user.fatherName || ''}"></div>
+                    <div class="form-group"><label>Mother's Name</label><input type="text" id="edit-mother" value="${user.otherName || ''}"></div>
+                ` : '';
+
+                contentArea.innerHTML = `
+                    <div class="profile-pro-container">
+                        <div class="profile-card" style="padding-top: 20px;">
+                            <h3 style="text-align:center; margin-bottom:30px; color:var(--primary);"><i class="fas fa-user-edit"></i> Edit Profile</h3>
+                            <div style="text-align:center; margin-bottom:30px; padding:20px; background:#fafafa; border-radius:8px; border:1px dashed #ccc;">
+                                <div class="photo-preview-box">
+                                    <img id="edit-preview-img" src="${photoSrc}" alt="Profile Preview">
+                                </div>
+                                <input type="file" id="edit-photo-input" accept="image/*" style="display:none" onchange="previewEditPhoto(this)">
+                                <label for="edit-photo-input" class="upload-label"><i class="fas fa-camera"></i> Upload Photo</label>
+                                <div style="margin-top:10px; font-size:0.8rem; color:#888;">Click to change your display picture</div>
+                            </div>
+                            <div style="padding: 0 40px 40px 40px 40px;">
+                                <form onsubmit="event.preventDefault(); saveProfile();">
+                                    <div class="edit-form-grid">
+                                        <div class="form-group"><label>Full Name</label><input type="text" id="edit-name" value="${user.name}" class="edit-mode-form"></div>
+                                        <div class="form-group"><label>Department</label><input type="text" id="edit-dept" value="${user.dept}" class="edit-mode-form"></div>
+                                        <div class="form-group"><label>Email Address</label><input type="email" id="edit-email" value="${user.email || ''}" class="edit-mode-form"></div>
+                                        <div class="form-group"><label>Phone Number</label><input type="tel" id="edit-phone" value="${user.phone || ''}" class="edit-mode-form"></div>
+                                        <div class="form-group full-width"><label>Campus Location</label><input type="text" id="edit-location" value="${user.location || ''}" class="edit-mode-form" placeholder="e.g. Block A, Room 101"></div>
+                                    </div>
+                                    ${studentEditFields}
+                                    <div style="display:flex; gap:15px; justify-content:center; margin-top:30px; border-top:1px solid #eee; padding-top:20px;">
+                                        <button type="submit" class="btn btn-success" style="width:auto; min-width:120px;">Save Changes</button>
+                                        <button type="button" class="btn btn-danger" onclick="toggleProfileEdit(false)" style="width:auto; min-width:120px;">Cancel</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+        }
+
+        function previewProfileImage(input) {
+            if(input.files && input.files[0]) {
+                var reader = new FileReader();
+                reader.onload = function(e) { 
+                    tempProfilePic = e.target.result;
+                    state.currentUser.photo = tempProfilePic;
+                    // Sync to sidebar immediately
+                    updateSidebarAvatar(tempProfilePic);
+                    renderProfile();
+                }
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+
+        function previewEditPhoto(input) {
+            if(input.files && input.files[0]) {
+                var reader = new FileReader();
+                reader.onload = function(e) { 
+                    tempProfilePic = e.target.result;
+                    document.getElementById('edit-preview-img').src = tempProfilePic;
+                }
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+
+        function saveProfile() {
+            const newName = document.getElementById('edit-name').value;
+            const newDept = document.getElementById('edit-dept'). value;
+            const newEmail = document.getElementById('edit-email').value;
+            const newPhone = document.getElementById('edit-phone').value;
+            const newLocation = document.getElementById('edit-location').value;
+
+            state.currentUser.name = newName; 
+            state.currentUser.dept = newDept;
+            state.currentUser.email = newEmail;
+            state.currentUser.phone = newPhone;
+            state.currentUser.location = newLocation;
+            
+            if (tempProfilePic) {
+                state.currentUser.photo = tempProfilePic;
+            }
+
+            if(state.currentUser.role === 'student') {
+                state.currentUser.studentCode = document.getElementById('edit-student-code').value;
+                state.currentUser.section = document.getElementById('edit-section').value;
+                state.currentUser.gmail = document.getElementById('edit-gmail').value;
+                state.currentUser.fatherName = document.getElementById('edit-father').value;
+                state.currentUser.otherName = document.getElementById('edit-mother').value;
+            }
+
+            const idx = state.users.findIndex(u => u.id === state.currentUser.id);
+            if(idx !== -1) {
+                state.users[idx] = state.currentUser; 
+                state.users[idx].photo = state.currentUser.photo;
+            }
+            
+            saveState(); 
+            updateSidebarAvatar(state.currentUser.photo); 
+            toggleProfileEdit(false); 
+            showToast("Profile Updated Successfully!");
+        }
+
+        function getUserWorkload(userId) { return timetableData.filter(t => t.userId === userId).length; }
+
+        function toggleProfileEdit(enable) { 
+            isEditingProfile = enable; 
+            if(!enable) { tempProfilePic = null; }
+            renderProfile(); 
+        }
+
+        function showToast(msg) {
+            const t = document.getElementById('toast'); t.innerText = msg; t.className = "show";
+            setTimeout(() => { t.className = t.className.replace("show", ""); }, 3000);
+        }
+
+        if(localStorage.getItem('fms_timetable')) {
+            const savedTT = JSON.parse(localStorage.getItem('fms_timetable'));
+            savedTT.forEach(item => {
+                if(!timetableData.find(t => t.userId === item.userId && t.day === item.day && t.time === item.time)) timetableData.push(item);
+            });
+        }
+    </script>
+</body>
+</html>
